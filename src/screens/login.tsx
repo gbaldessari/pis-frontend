@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Grid, Paper, Box, Typography, TextField, Button } from "@mui/material";
+import { Container, Grid, Paper, Typography, TextField, Button } from "@mui/material";
 
 type LoginType = {
   email: string;
@@ -59,7 +59,7 @@ export const LoginPage: React.FC<{}> = () => {
             <Typography sx={{ mt: 1.5, mb: 1.5 }} variant="h4">
               Login
             </Typography>
-            <Box component="form" onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit}>
               <TextField
                 name="email"
                 margin="normal"
@@ -94,15 +94,15 @@ export const LoginPage: React.FC<{}> = () => {
               >
                 Iniciar Sesión
               </Button>
-            </Box>
+            </form>
             <Button
-                fullWidth
-                variant="text"
-                sx={{ mt: 1 }}
-                onClick={() => navigate("/forgotten")}
-              >
-                ¿Olvidó su contraseña?
-              </Button>
+              fullWidth
+              variant="text"
+              sx={{ mt: 1 }}
+              onClick={() => navigate("/forgotten")}
+            >
+              ¿Olvidó su contraseña?
+            </Button>
           </Paper>
         </Grid>
       </Grid>

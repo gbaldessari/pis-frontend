@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Grid, Paper, Box, Typography, TextField, Button } from "@mui/material";
+import { Container, Grid, Paper, Typography, TextField, Button } from "@mui/material";
 
 type RegisterType = {
   name: string;
@@ -84,7 +84,7 @@ export const RegisterPage: React.FC<{}> = () => {
             <Typography sx={{ mt: 1.5, mb: 1.5 }} variant="h4">
               Registro
             </Typography>
-            <Box component="form" onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit}>
               <TextField
                 name="name"
                 margin="normal"
@@ -158,7 +158,7 @@ export const RegisterPage: React.FC<{}> = () => {
               >
                 Registrarse
               </Button>
-            </Box>
+            </form>
           </Paper>
         </Grid>
       </Grid>

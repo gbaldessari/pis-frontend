@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import {useNavigate} from "react-router-dom";
-import {Container, Grid, Paper, Box, Typography, TextField, Button} from "@mui/material";
+import {Container, Grid, Paper, Typography, TextField, Button} from "@mui/material";
 
 type RecoverType = {
   email: string;
@@ -56,7 +56,7 @@ export const ForgottenPasswordPage: React.FC<{}> = () => {
             <Typography sx={{ mt: 1.5, mb: 1.5 }} variant="h4">
               Recuperar Contraseña
             </Typography>
-            <Box component="form" onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit}>
               <TextField
                 name="email"
                 margin="normal"
@@ -78,7 +78,7 @@ export const ForgottenPasswordPage: React.FC<{}> = () => {
               >
                 Enviar Correo de Recuperacion
               </Button>
-            </Box>
+            </form>
           </Paper>
         </Grid>
       </Grid>
