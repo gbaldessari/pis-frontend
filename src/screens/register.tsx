@@ -1,14 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Container,
-  Grid,
-  Paper,
-  Box,
-  Typography,
-  TextField,
-  Button,
-} from "@mui/material";
+import { Container, Grid, Paper, Box, Typography, TextField, Button } from "@mui/material";
 
 type RegisterType = {
   name: string;
@@ -21,7 +13,7 @@ type RegisterType = {
 export const RegisterPage: React.FC<{}> = () => {
   const navigate = useNavigate();
 
-  const [registerData, setRegisterData] = React.useState<RegisterType>({
+  const [registerData, setRegisterData] = useState<RegisterType>({
     name: "",
     email: "",
     password: "",
@@ -29,50 +21,41 @@ export const RegisterPage: React.FC<{}> = () => {
     address: "",
   });
 
-  // Estado para almacenar los mensajes de error
-  const [errors, setErrors] = React.useState<Partial<RegisterType>>({});
+  const [errors, setErrors] = useState<Partial<RegisterType>>({});
 
   const dataRegister = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRegisterData({ ...registerData, [event.target.name]: event.target.value });
-    // Limpiar el error cuando el usuario comience a escribir en un campo
-    setErrors({ ...errors, [event.target.name]: "" });
+    const { name, value } = event.target;
+    setRegisterData({ ...registerData, [name]: value });
+    setErrors({ ...errors, [name]: "" });
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
+  const handleSubmit = () => {
     const newErrors: Partial<RegisterType> = {};
 
-    // Verificar que los campos no estén vacíos
     Object.entries(registerData).forEach(([key, value]) => {
       if (value.trim() === "") {
         newErrors[key as keyof RegisterType] = `${key} no puede estar vacío`;
       }
     });
 
-    // Validar el nombre
     if (registerData.name.length < 2 || registerData.name.length > 64) {
       newErrors.name = "El nombre debe tener entre 2 y 64 caracteres";
     }
 
-    // Validar la contraseña
     if (registerData.password.length < 8 || registerData.password.length > 16) {
       newErrors.password = "La contraseña debe tener entre 8 y 16 caracteres";
     }
 
-    // Validar el correo electrónico
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(registerData.email)) {
       newErrors.email = "Correo electrónico inválido";
     }
 
-    // Validar el número de teléfono
     const phonePattern = /^\d{9}$/;
     if (!phonePattern.test(registerData.phone)) {
       newErrors.phone = "Número de teléfono inválido";
     }
 
-    // Validar la dirección
     if (registerData.address.length < 2 || registerData.address.length > 64) {
       newErrors.address = "La dirección debe tener entre 2 y 64 caracteres";
     }
@@ -98,7 +81,7 @@ export const RegisterPage: React.FC<{}> = () => {
         <Grid item>
           <Paper sx={{ padding: "1.2em", borderRadius: "0.5em" }}>
             <Typography sx={{ mt: 1.5, mb: 1.5 }} variant="h4">
-              Registro{" "}
+              Registro
             </Typography>
             <Box component="form" onSubmit={handleSubmit}>
               <TextField
@@ -117,9 +100,9 @@ export const RegisterPage: React.FC<{}> = () => {
               <TextField
                 name="email"
                 margin="normal"
-                type="text"
+                type="email"
                 fullWidth
-                label="Correo Electronico"
+                label="Correo Electrónico"
                 sx={{ mt: 2, mb: 1.5 }}
                 required
                 error={!!errors.email}
@@ -145,7 +128,7 @@ export const RegisterPage: React.FC<{}> = () => {
                 margin="normal"
                 type="text"
                 fullWidth
-                label="Numero Telefonico"
+                label="Número Telefónico"
                 sx={{ mt: 2, mb: 1.5 }}
                 required
                 error={!!errors.phone}
@@ -158,7 +141,7 @@ export const RegisterPage: React.FC<{}> = () => {
                 margin="normal"
                 type="text"
                 fullWidth
-                label="Direccion"
+                label="Dirección"
                 sx={{ mt: 2, mb: 1.5 }}
                 required
                 error={!!errors.address}
@@ -181,5 +164,3 @@ export const RegisterPage: React.FC<{}> = () => {
     </Container>
   );
 };
-
-export default RegisterPage;

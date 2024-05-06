@@ -1,14 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Container,
-  Grid,
-  Paper,
-  Box,
-  Typography,
-  TextField,
-  Button,
-} from "@mui/material";
+import { Container, Grid, Paper, Box, Typography, TextField, Button } from "@mui/material";
 
 type LoginType = {
   email: string;
@@ -18,31 +10,26 @@ type LoginType = {
 export const LoginPage: React.FC<{}> = () => {
   const navigate = useNavigate();
 
-  const [loginData, setLoginData] = React.useState<LoginType>({
+  const [loginData, setLoginData] = useState<LoginType>({
     email: "",
     password: "",
   });
 
-  // Estado para almacenar los mensajes de error
-  const [errors, setErrors] = React.useState<Partial<LoginType>>({});
+  const [errors, setErrors] = useState<Partial<LoginType>>({});
 
   const dataLogin = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setLoginData({ ...loginData, [event.target.name]: event.target.value });
-    // Limpiar el error cuando el usuario comience a escribir en un campo
-    setErrors({ ...errors, [event.target.name]: "" });
+    const { name, value } = event.target;
+    setLoginData({ ...loginData, [name]: value });
+    setErrors({ ...errors, [name]: "" });
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); // Evitar el envío automático del formulario
-
+  const handleSubmit = () => {
     const newErrors: Partial<LoginType> = {};
 
-    // Validar la contraseña
     if (loginData.password.length < 8 || loginData.password.length > 16) {
       newErrors.password = "La contraseña debe tener entre 8 y 16 caracteres";
     }
 
-    // Validar el correo electrónico
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(loginData.email)) {
       newErrors.email = "Correo electrónico inválido";
@@ -54,9 +41,7 @@ export const LoginPage: React.FC<{}> = () => {
       return;
     }
 
-    // Aquí puedes agregar la lógica para autenticar al usuario
-    // Por ahora, simplemente redirigimos al usuario a otra página
-    navigate("/users");
+    navigate("/home");
   };
 
   return (
@@ -71,15 +56,15 @@ export const LoginPage: React.FC<{}> = () => {
         <Grid item>
           <Paper sx={{ padding: "1.2em", borderRadius: "0.5em" }}>
             <Typography sx={{ mt: 1.5, mb: 1.5 }} variant="h4">
-              Login{" "}
+              Login
             </Typography>
             <Box component="form" onSubmit={handleSubmit}>
               <TextField
                 name="email"
                 margin="normal"
-                type="text"
+                type="email"
                 fullWidth
-                label="Correo Electronico"
+                label="Correo Electrónico"
                 sx={{ mt: 2, mb: 1.5 }}
                 required
                 error={!!errors.email}
@@ -104,9 +89,18 @@ export const LoginPage: React.FC<{}> = () => {
                 fullWidth
                 type="submit"
                 variant="contained"
-                sx={{ mt: 1.5, mb: 3 }}
+                sx={{ mt: 1.5, mb: 1 }}
+                onClick={() => handleSubmit()}
               >
                 Iniciar Sesión
+              </Button>
+              <Button
+                fullWidth
+                variant="text"
+                sx={{ mt: 1 }}
+                onClick={() => navigate("/forgotten")}
+              >
+                ¿Olvidó su contraseña?
               </Button>
             </Box>
           </Paper>
@@ -115,5 +109,3 @@ export const LoginPage: React.FC<{}> = () => {
     </Container>
   );
 };
-
-export default LoginPage;

@@ -3,9 +3,9 @@ import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { ThemeConfig } from "./config/theme.config.tsx";
-import ErrorPage from "./pages/error.page.tsx";
+import ErrorPage from "./screens/error";
 import { AppRoutes } from "./Root.tsx";
-import { Users } from "./pages/users/index.tsx";
+import { HomePage } from "./screens/home";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 
 
@@ -17,7 +17,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/users",
-    element: <Users />,
+    element: <HomePage />,
   },
 ]);
 
