@@ -23,7 +23,8 @@ export const LoginPage: React.FC<{}> = () => {
     setErrors({ ...errors, [name]: "" });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
     const newErrors: Partial<LoginType> = {};
 
     if (loginData.password.length < 8 || loginData.password.length > 16) {
@@ -40,7 +41,7 @@ export const LoginPage: React.FC<{}> = () => {
     if (Object.values(newErrors).some(error => error !== "")) {
       return;
     }
-
+    
     navigate("/home");
   };
 
@@ -90,11 +91,11 @@ export const LoginPage: React.FC<{}> = () => {
                 type="submit"
                 variant="contained"
                 sx={{ mt: 1.5, mb: 1 }}
-                onClick={() => handleSubmit()}
               >
                 Iniciar Sesión
               </Button>
-              <Button
+            </Box>
+            <Button
                 fullWidth
                 variant="text"
                 sx={{ mt: 1 }}
@@ -102,7 +103,6 @@ export const LoginPage: React.FC<{}> = () => {
               >
                 ¿Olvidó su contraseña?
               </Button>
-            </Box>
           </Paper>
         </Grid>
       </Grid>

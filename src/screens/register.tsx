@@ -29,7 +29,8 @@ export const RegisterPage: React.FC<{}> = () => {
     setErrors({ ...errors, [name]: "" });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
     const newErrors: Partial<RegisterType> = {};
 
     Object.entries(registerData).forEach(([key, value]) => {

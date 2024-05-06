@@ -22,7 +22,8 @@ export const ForgottenPasswordPage: React.FC<{}> = () => {
     setErrors({ ...errors, [name]: "" });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit  = (event: React.FormEvent) => {
+    event.preventDefault();
     const newErrors: Partial<RecoverType> = {};
 
     // Validar el correo electrónico
@@ -74,7 +75,6 @@ export const ForgottenPasswordPage: React.FC<{}> = () => {
                 type="submit"
                 variant="contained"
                 sx={{ mt: 1.5 }}
-                onClick={() => handleSubmit()}
               >
                 Enviar Correo de Recuperacion
               </Button>
