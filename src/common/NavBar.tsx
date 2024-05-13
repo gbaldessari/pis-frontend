@@ -1,7 +1,7 @@
 import React from "react";
 import { AppBar, Box, Container, Toolbar, Grid, Button, Typography, Stack } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import MapachePedro from "../assets/mapache-pedro-mapache.gif";
+import Logo from "../assets/logo.png";
 
 export const NavBar: React.FC<{}> = () => {
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ export const NavBar: React.FC<{}> = () => {
                 <Typography variant="h6" component="div">
                   PapaJobs
                 </Typography>
-                <img src={MapachePedro} alt="Mapache Pedro" width="100" />
+                <img src={Logo} alt="logo" width="100" />
               </Grid>
               <Grid item>
                 <Stack direction="row" spacing={2}>
