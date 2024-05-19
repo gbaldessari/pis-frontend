@@ -5,30 +5,31 @@ import "./index.css";
 import { ThemeConfig } from "./config/theme.config.tsx";
 import ErrorPage from "./screens/error";
 import { AppRoutes } from "./Root.tsx";
-import { HomePage } from "./screens/home";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { ApolloClient, ApolloProvider, HttpLink, InMemoryCache } from "@apollo/client";
 
+const client = new ApolloClient({
+  cache: new InMemoryCache(),
+  link: new HttpLink({
+    uri: "http://localhost:3000/graphql"
+  })
+});
 
 const router = createBrowserRouter([
   {
     path: "/",
     element:<AppRoutes/>,
     errorElement: <ErrorPage />,
-  },
-  {
-    path: "/users",
-    element: <HomePage />,
-  },
+  }
 ]);
-
 
 <RouterProvider router={router} />
 ReactDOM.createRoot(document.getElementById("root")!).render(
-
-  <React.StrictMode>
-    <ThemeConfig>
-    <App />
-    </ThemeConfig>
-   
-  </React.StrictMode>
+  <ApolloProvider client={client}>
+    <React.StrictMode>
+      <ThemeConfig>
+      <App />
+      </ThemeConfig>
+    </React.StrictMode>
+  </ApolloProvider> 
 );

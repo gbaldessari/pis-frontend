@@ -1,6 +1,16 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Grid, Paper, Typography, TextField, Button } from "@mui/material";
+import { 
+  Container, 
+  Grid, 
+  Paper, 
+  Typography, 
+  TextField, 
+  Button 
+} from "@mui/material";
+import { LOGIN_USER } from "../graphql/users.graphql";
+import { useMutation } from "@apollo/client";
+
 
 type LoginType = {
   email: string;
@@ -16,6 +26,10 @@ export const LoginPage: React.FC<{}> = () => {
   });
 
   const [errors, setErrors] = useState<Partial<LoginType>>({});
+  
+  const [login, {loading, error}] = useMutation(LOGIN_USER);
+  if (loading) return 'Submitting...';
+  if (error) return `Submission error! ${error.message}`;
 
   const dataLogin = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -41,6 +55,13 @@ export const LoginPage: React.FC<{}> = () => {
     if (Object.values(newErrors).some(error => error !== "")) {
       return;
     }
+
+    console.log (loginData);
+
+    login({ variables: {
+      email: loginData.email,
+      password: loginData.password
+    }});
     
     navigate("/home");
   };
@@ -59,7 +80,7 @@ export const LoginPage: React.FC<{}> = () => {
             <Typography sx={{ mt: 1.5, mb: 1.5 }} variant="h4">
               Login
             </Typography>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={(e) => handleSubmit(e)}>
               <TextField
                 name="email"
                 margin="normal"
