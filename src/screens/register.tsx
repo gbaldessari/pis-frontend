@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Container, Grid, Paper, Typography, TextField, Button } from "@mui/material";
+import { useMutation } from "@apollo/client";
+import { REGISTER_USER } from "../graphql/users.graphql";
 
 type RegisterType = {
   name: string;
@@ -22,6 +24,10 @@ export const RegisterPage: React.FC<{}> = () => {
   });
 
   const [errors, setErrors] = useState<Partial<RegisterType>>({});
+
+  const [register, {loading, error}] = useMutation(REGISTER_USER);
+  if (loading) return 'Submitting...';
+  if (error) return `Submission error! ${error.message}`;
 
   const dataRegister = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -67,6 +73,14 @@ export const RegisterPage: React.FC<{}> = () => {
       return;
     }
 
+    register({ variables: {
+      username: registerData.name,
+      email: registerData.email,
+      password: registerData.password,
+      phone: parseInt(registerData.phone),
+      address: registerData.address,
+    }});
+
     navigate("/");
   };
 
@@ -84,7 +98,7 @@ export const RegisterPage: React.FC<{}> = () => {
             <Typography sx={{ mt: 1.5, mb: 1.5 }} variant="h4">
               Registro
             </Typography>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={(e) => handleSubmit(e)}>
               <TextField
                 name="name"
                 margin="normal"
