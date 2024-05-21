@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useQuery } from "@apollo/client";
 import { io, Socket } from "socket.io-client";
+import { GET_USERS } from "../graphql/users.graphql";
 import {
   TextField,
   Grid,
@@ -15,12 +17,14 @@ import {
   InputLabel,
   Drawer,
   Fab,
+  Box
 } from "@mui/material";
 import ChatIcon from "@mui/icons-material/Chat";
 
 type User = {
-  id: string;
-  name: string;
+    id: string;
+    username: string;
+    
 };
 
 type Message = {
@@ -29,26 +33,23 @@ type Message = {
 };
 
 export function Chat() {
-
+  const { loading, error, data } = useQuery(GET_USERS);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [newMessage, setNewMessage] = useState<string>('');
   const [messages, setMessages] = useState<Message[]>([]);
-  
   const [users, setUsers] = useState<User[]>([]);
-  
   const [selectedUser, setSelectedUser] = useState<string>('');
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
 
+  // ver si necesito friltar solo por profesionales
+  useEffect(() => { 
+    if (data && data.users) {
+      setUsers(data.users);
+    }
+  }, [data]);
 
-  // Esta parte no se si está correcto 
   useEffect(() => {
-    // depende del back
-    fetch('')
-      .then(response => response.json())
-      .then(data => setUsers(data as User[]));
-
-    // Establecer la conexión de socket
     const newSocket: Socket = io('http://localhost:3000');
     setSocket(newSocket);
 
@@ -85,6 +86,10 @@ export function Chat() {
     setIsChatOpen(!isChatOpen);
   };
 
+  // COMENTADOS PARA PODER VER LO VISUAL 
+  //if (loading) return <p>Loading...</p>;
+  //if (error) return <p>Error: {error.message}</p>;
+
   return (
     <>
       <Fab
@@ -96,54 +101,58 @@ export function Chat() {
         <ChatIcon />
       </Fab>
       <Drawer
-        anchor="bottom"
+        anchor="right"
         open={isChatOpen}
         onClose={toggleChat}
         PaperProps={{
-          style: { height: '50%', top: '50%', transform: 'translateY(-50%)' }
+          style: { width: '38%' }
         }}
       >
-        <div className="Chat" style={{ padding: 20 }}>
-          <Typography variant="h2">{isConnected ? 'Connected' : 'Disconnected'}</Typography>
-          <FormControl fullWidth style={{ marginTop: 20 }}>
-            <InputLabel id="select-user-label">Select User</InputLabel>
-            <Select
-              labelId="select-user-label"
-              value={selectedUser}
-              onChange={(e) => setSelectedUser(e.target.value as string)}
-            >
-              {users.map((user) => (
-                <MenuItem key={user.id} value={user.id}>
-                  {user.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <Paper style={{ padding: 20, marginTop: 20, marginBottom: 20, maxHeight: '70%', overflowY: 'auto' }}>
-            <List>
-              {messages.map((msg, index) => (
-                <ListItem key={index}>
-                  <ListItemText primary={`${msg.user}: ${msg.content}`} />
-                </ListItem>
-              ))}
-            </List>
-          </Paper>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={10}>
-              <TextField
-                label="Message"
-                fullWidth
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-              />
+        <Box display="flex" flexDirection="column" height="100%">
+          <Box flexGrow={1} p={2} display="flex" flexDirection="column">
+            <Typography variant="h5">{isConnected ? 'Connected' : 'Disconnected'}</Typography>
+            <FormControl fullWidth style={{ marginTop: 20 }}>
+              <InputLabel id="select-user-label">Select User</InputLabel>
+              <Select
+                labelId="select-user-label"
+                value={selectedUser}
+                onChange={(e) => setSelectedUser(e.target.value as string)}
+              >
+                {users.map((user) => (
+                  <MenuItem key={user.id} value={user.id}>
+                    {user.username}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Paper style={{ flexGrow: 1, padding: 20, marginTop: 20, overflowY: 'auto' }}>
+              <List>
+                {messages.map((msg, index) => (
+                  <ListItem key={index}>
+                    <ListItemText primary={`${msg.user}: ${msg.content}`} />
+                  </ListItem>
+                ))}
+              </List>
+            </Paper>
+          </Box>
+          <Box p={2} borderTop="1px solid #ccc">
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={10}>
+                <TextField
+                  label="Message"
+                  fullWidth
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={2}>
+                <Button variant="contained" color="primary" fullWidth onClick={handleSendMessage}>
+                  Enviar
+                </Button>
+              </Grid>
             </Grid>
-            <Grid item xs={2}>
-              <Button variant="contained" color="primary" fullWidth onClick={handleSendMessage}>
-                Enviar Mensaje
-              </Button>
-            </Grid>
-          </Grid>
-        </div>
+          </Box>
+        </Box>
       </Drawer>
     </>
   );
