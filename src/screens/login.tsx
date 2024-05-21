@@ -8,8 +8,8 @@ import {
   TextField, 
   Button 
 } from "@mui/material";
-import { LOGIN_USER } from "../graphql/users.graphql";
-import { useMutation } from "@apollo/client";
+import { GET_USERS, LOGIN_USER } from "../graphql/users.graphql";
+import { useMutation, useQuery } from "@apollo/client";
 
 
 type LoginType = {
@@ -26,7 +26,7 @@ export const LoginPage: React.FC<{}> = () => {
   });
 
   const [errors, setErrors] = useState<Partial<LoginType>>({});
-  
+
   const [login, {loading, error}] = useMutation(LOGIN_USER);
   if (loading) return 'Submitting...';
   if (error) return `Submission error! ${error.message}`;
