@@ -3,8 +3,8 @@ import { gql } from "@apollo/client";
 // ------------------- MUTATIONS ------------------- //
 
 /**
- * Registers a new user with the provided details (username, email, password, phone, and address).
- * @return {Object} The newly registered user's details and a message.
+ * Registers a new user with the provided details (username, email, password, phone, address, and isProfessional).
+ * @return {Object} The newly registered user's details, a message, and a success flag.
  */
 export const REGISTER_USER = gql`
     mutation register(
@@ -12,7 +12,8 @@ export const REGISTER_USER = gql`
         $email: String!,
         $password: String!,
         $phone: Int!,
-        $address:String!,
+        $address: String!,
+        $isProfessional: Boolean
     ) {
         register(registerInput: {
             username: $username,
@@ -20,22 +21,25 @@ export const REGISTER_USER = gql`
             password: $password,
             phone: $phone,
             address: $address,
+            isProfessional: $isProfessional
         }) {
-            user {
+            data {
                 id
                 username
                 email
                 phone
                 address
+                isProfessional
             }
             message
+            success
         }
     }
 `;
 
 /**
  * Logs in a user with the provided email and password.
- * @return {Object} The user's email and a token.
+ * @return {Object} The user's email, a token, a message, and a success flag.
  */
 export const LOGIN_USER = gql`
     mutation login(
@@ -46,15 +50,19 @@ export const LOGIN_USER = gql`
             email: $email,
             password: $password,
         }) {
-            email
-            token
+            data {
+                email
+                token
+            }
+            message
+            success
         }
     }
 `;
 
 /**
  * Creates settings for a user specifying whether they receive emails and notifications.
- * @return {Object} The user's settings.
+ * @return {Object} The user's settings details, a message, and a success flag.
  */
 export const CREATE_USER_SETTINGS = gql`
   mutation createUserSettings(
@@ -67,16 +75,23 @@ export const CREATE_USER_SETTINGS = gql`
       receiveEmails: $receiveEmails,
       receiveNotifications: $receiveNotifications
     }) {
-      userID
-      receiveEmails
-      receiveNotifications
+      data {
+        id
+        username
+        email
+        phone
+        address
+        isProfessional
+      }
+      message
+      success
     }
   }
 `;
 
 /**
  * Edits an existing user's details (username, email, password, phone, and address) based on their email.
- * @return {Object} The updated user's details.
+ * @return {Object} The updated user's details, a message, and a success flag.
  */
 export const EDIT_USER = gql`
   mutation editUser(
@@ -96,19 +111,23 @@ export const EDIT_USER = gql`
         address: $address
       }
     ) {
-      id
-      username
-      email
-      phone
-      address
-      isProfessional
+      data {
+        id
+        username
+        email
+        phone
+        address
+        isProfessional
+      }
+      message
+      success
     }
   }
 `;
 
 /**
  * Requests a password reset for the user associated with the provided email.
- * @return {Object} A message and the user's details.
+ * @return {Object} A message, the user's details, and a success flag.
  */
 export const REQUEST_PASSWORD_RESET = gql`
   mutation requestPasswordReset($email: String!) {
@@ -118,15 +137,18 @@ export const REQUEST_PASSWORD_RESET = gql`
         id
         username
         email
+        phone
+        address
         isProfessional
       }
+      success
     }
   }
 `;
 
 /**
  * Resets the user's password using the provided email, reset token, and new password.
- * @return {Object} A message and the updated user's details.
+ * @return {Object} A message, the updated user's details, and a success flag.
  */
 export const RESET_PASSWORD = gql`
   mutation resetPassword(
@@ -144,8 +166,11 @@ export const RESET_PASSWORD = gql`
         id
         username
         email
+        phone
+        address
         isProfessional
       }
+      success
     }
   }
 `;
@@ -172,17 +197,20 @@ export const GET_USERS = gql`
 /**
  * Fetches a user by their email.
  * @param {String} email - The email of the user to fetch.
- * @return {Object} The user's details.
+ * @return {Object} The user's details and a success flag.
  */
 export const GET_USER_BY_EMAIL = gql`
   query userByEmail($email: String!) {
     userByEmail(email: $email) {
-      id
-      username
-      email
-      phone
-      address
-      isProfessional
+      data {
+        id
+        username
+        email
+        phone
+        address
+        isProfessional
+      }
+      success
     }
   }
 `;
@@ -190,17 +218,20 @@ export const GET_USER_BY_EMAIL = gql`
 /**
  * Fetches a user by their ID.
  * @param {Int} id - The ID of the user to fetch.
- * @return {Object} The user's details.
+ * @return {Object} The user's details and a success flag.
  */
 export const GET_USER_BY_ID = gql`
   query userById($id: Int!) {
     userById(id: $id) {
-      id
-      username
-      email
-      phone
-      address
-      isProfessional
+      data {
+        id
+        username
+        email
+        phone
+        address
+        isProfessional
+      }
+      success
     }
   }
 `;
@@ -209,23 +240,43 @@ export const GET_USER_BY_ID = gql`
  * Checks if a user has a meeting on a specific date.
  * @param {Int} id - The ID of the user.
  * @param {String} date - The date to check for meetings.
- * @return {Boolean} Whether the user has a meeting on the specified date.
+ * @return {Object} Whether the user has a meeting on the specified date and a success flag.
  */
 export const USER_MEET_BY_DATE = gql`
   query userMeetByDate($id: Int!, $date: String!) {
-    userMeetByDate(id: $id, date: $date)
+    userMeetByDate(id: $id, date: $date) {
+      data {
+        id
+        username
+        email
+        phone
+        address
+        isProfessional
+      }
+      success
+    }
   }
 `;
 
 /**
  * Sends a recovery email to the user with the provided details.
  * @param {Object} user - The user details.
- * @return {Object} A message indicating the status of the email.
+ * @return {Object} A message indicating the status of the email, the user's details, and a success flag.
  */
 export const SEND_USER_RECOVERY = gql`
   query sendUserRecovery($user: UserInput!) {
     sendUserRecovery(user: $user) {
       message
+      data {
+        id
+        username
+        email
+        phone
+        address
+        isProfessional
+      }
+      success
     }
   }
 `;
+
