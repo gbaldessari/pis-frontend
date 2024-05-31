@@ -1,16 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  Container, 
-  Grid, 
-  Paper, 
-  Typography, 
-  TextField, 
-  Button 
-} from "@mui/material";
-import { LOGIN_USER } from "../graphql/users.graphql";
+import { Container, Grid, Paper, Typography, TextField, Button } from "@mui/material";
 import { useMutation } from "@apollo/client";
-
+import { LOGIN_USER } from "../graphql/users.graphql";
+import Cookies from "js-cookie";
 
 type LoginType = {
   email: string;
@@ -20,14 +13,29 @@ type LoginType = {
 export const LoginPage: React.FC<{}> = () => {
   const navigate = useNavigate();
 
-  const [loginData, setLoginData] = useState<LoginType>({
+  const [loginData, setLoginData] = useState<LoginType>({     
     email: "",
     password: "",
   });
 
   const [errors, setErrors] = useState<Partial<LoginType>>({});
-  
-  const [login, {loading, error}] = useMutation(LOGIN_USER);
+
+  const [login, { loading, error }] = useMutation(LOGIN_USER, {
+    onCompleted: (data) => {
+      if (data && data.login && data.login.data && data.login.data.token) {
+        const token = data.login.data.token;
+        Cookies.set("auth-token", token);
+        console.log (data.login.data.token);
+        navigate("/home");
+      } else {
+        console.error("Formato de datos inesperado devuelto desde el servidor:", data);
+      }
+    },
+    onError: (error) => {
+      console.error("Error en la mutación:", error);
+    }
+  });
+
   if (loading) return 'Submitting...';
   if (error) return `Submission error! ${error.message}`;
 
@@ -56,25 +64,17 @@ export const LoginPage: React.FC<{}> = () => {
       return;
     }
 
-    console.log (loginData);
-
-    login({ variables: {
-      email: loginData.email,
-      password: loginData.password
-    }});
-    
-    navigate("/home");
+    login({
+      variables: {
+        email: loginData.email,
+        password: loginData.password,
+      },
+    });
   };
 
   return (
     <Container maxWidth="sm">
-      <Grid
-        container
-        direction="column"
-        justifyContent="center"
-        alignItems="center"
-        sx={{ minHeight: "100vh" }}
-      >
+      <Grid container direction="column" justifyContent="center" alignItems="center" sx={{ minHeight: "100vh" }}>
         <Grid item>
           <Paper sx={{ padding: "1.2em", borderRadius: "0.5em" }}>
             <Typography sx={{ mt: 1.5, mb: 1.5 }} variant="h4">
@@ -107,21 +107,11 @@ export const LoginPage: React.FC<{}> = () => {
                 onChange={dataLogin}
                 value={loginData.password}
               />
-              <Button
-                fullWidth
-                type="submit"
-                variant="contained"
-                sx={{ mt: 1.5, mb: 1 }}
-              >
+              <Button fullWidth type="submit" variant="contained" sx={{ mt: 1.5, mb: 1 }}>
                 Iniciar Sesión
               </Button>
             </form>
-            <Button
-              fullWidth
-              variant="text"
-              sx={{ mt: 1 }}
-              onClick={() => navigate("/forgotten")}
-            >
+            <Button fullWidth variant="text" sx={{ mt: 1 }} onClick={() => navigate("/forgotten")}>
               ¿Olvidó su contraseña?
             </Button>
           </Paper>
@@ -129,4 +119,4 @@ export const LoginPage: React.FC<{}> = () => {
       </Grid>
     </Container>
   );
-};
+};    

@@ -5,7 +5,7 @@ import { ThemeConfig } from "../config/theme.config";
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
-
+    
   return (
     <ThemeConfig>
       <div style={{ textAlign: "center" }}>
