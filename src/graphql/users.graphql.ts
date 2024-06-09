@@ -3,22 +3,6 @@ import { gql } from "@apollo/client";
 // ------------------- MUTATIONS ------------------- //
 
 /**
- 
-Verifies a token and returns the user payload.
-@return {Object} The user payload containing id, email, iat, and exp.
-*/
-export const VERIFY_TOKEN = gql`
-  mutation verifyToken {
-    verifyToken {
-      id
-      email
-      iat
-      exp
-    }
-  }
-`;
-
-/**
  * Registers a new user with the provided details (username, email, password, phone, address, and isProfessional).
  * @return {Object} The newly registered user's details, a message, and a success flag.
  */
@@ -48,17 +32,11 @@ export const REGISTER_USER = gql`
 
 /**
  * Logs in a user with the provided email and password.
- * @return {Object} The user's email, a token, a message, and a success flag.
+ * @return {Object} The user's token, email, a message, and a success flag.
  */
 export const LOGIN_USER = gql`
-  mutation login(
-    $email: String!,
-    $password: String!
-  ) {
-    login(loginInput: {
-      email: $email,
-      password: $password
-    }) {
+  mutation login($email: String!, $password: String!) {
+    login(loginInput: {email: $email, password: $password}) {
       data {
         token
         email
@@ -70,19 +48,25 @@ export const LOGIN_USER = gql`
 `;
 
 /**
- * Creates settings for a user specifying whether they receive emails and notifications.
- * @return {Object} The user's settings details, a message, and a success flag.
+ * Edits an existing user's details.
+ * @return {Object} A message and a success flag.
  */
-export const CREATE_USER_SETTINGS = gql`
-  mutation createUserSettings(
-    $userID: Int!,
-    $receiveEmails: Boolean!,
-    $receiveNotifications: Boolean!
+export const EDIT_USER = gql`
+  mutation editUser(
+    $username: String,
+    $email: String,
+    $password: String,
+    $phone: Int,
+    $address: String,
+    $isProfessional: Boolean
   ) {
-    createUserSettings(userSettingsInput: {
-      userID: $userID,
-      receiveEmails: $receiveEmails,
-      receiveNotifications: $receiveNotifications
+    editUser(editUserInput: {
+      username: $username,
+      email: $email,
+      password: $password,
+      phone: $phone,
+      address: $address,
+      isProfessional: $isProfessional
     }) {
       data
       message
@@ -92,37 +76,8 @@ export const CREATE_USER_SETTINGS = gql`
 `;
 
 /**
- * Edits an existing user's details (username, email, password, phone, and address) based on their email.
- * @return {Object} The updated user's details, a message, and a success flag.
- */
-export const EDIT_USER = gql`
-  mutation editUser(
-    $email: String!,
-    $username: String,
-    $password: String,
-    $phone: Int,
-    $address: String
-  ) {
-    editUser(
-      email: $email,
-      editUserInput: {
-        username: $username,
-        email: $email,
-        password: $password,
-        phone: $phone,
-        address: $address
-      }
-    ) {
-      data
-      message
-      success
-    }
-  }
-`;
-
-/**
- * Requests a password reset for the user associated with the provided email.
- * @return {Object} A message, the user's details, and a success flag.
+ * Requests a password reset for a user by email.
+ * @return {Object} A message and a success flag.
  */
 export const REQUEST_PASSWORD_RESET = gql`
   mutation requestPasswordReset($email: String!) {
@@ -135,8 +90,8 @@ export const REQUEST_PASSWORD_RESET = gql`
 `;
 
 /**
- * Resets the user's password using the provided email, reset token, and new password.
- * @return {Object} A message, the updated user's details, and a success flag.
+ * Resets a user's password using a reset token.
+ * @return {Object} A message and a success flag.
  */
 export const RESET_PASSWORD = gql`
   mutation resetPassword(
@@ -156,14 +111,30 @@ export const RESET_PASSWORD = gql`
   }
 `;
 
+/**
+ * Verifies a user's token.
+ * @return {Object} The user's id, email, issued at timestamp, and expiration timestamp.
+ */
+export const VERIFY_TOKEN = gql`
+  mutation verifyToken {
+    verifyToken {
+      id
+      email
+      isAdmin
+      iat
+      exp
+    }
+  }
+`;
+
 // ------------------- QUERIES ------------------- //
 
 /**
  * Fetches a list of all users.
- * @return {Array} A list of users.
+ * @return {Object[]} A list of users.
  */
 export const GET_USERS = gql`
-  query {
+  query users {
     users {
       id
       username
@@ -176,56 +147,12 @@ export const GET_USERS = gql`
 `;
 
 /**
- * Fetches a user by their email.
- * @param {String} email - The email of the user to fetch.
- * @return {Object} The user's details and a success flag.
+ * Fetches the total sales generated.
+ * @return {Object} The total sales amount, a message, and a success flag.
  */
-export const GET_USER_BY_EMAIL = gql`
-  query userByEmail($email: String!) {
-    userByEmail(email: $email) {
-      data {
-        id
-        username
-        email
-        phone
-        address
-        isProfessional
-      }
-      success
-    }
-  }
-`;
-
-/**
- * Fetches a user by their ID.
- * @param {Int} id - The ID of the user to fetch.
- * @return {Object} The user's details and a success flag.
- */
-export const GET_USER_BY_ID = gql`
-  query userById($id: Int!) {
-    userById(id: $id) {
-      data {
-        id
-        username
-        email
-        phone
-        address
-        isProfessional
-      }
-      success
-    }
-  }
-`;
-
-/**
- * Checks if a user has a meeting on a specific date.
- * @param {Int} id - The ID of the user.
- * @param {String} date - The date to check for meetings.
- * @return {Object} Whether the user has a meeting on the specified date and a success flag.
- */
-export const USER_MEET_BY_DATE = gql`
-  query userMeetByDate($id: Int!, $date: String!) {
-    userMeetByDate(id: $id, date: $date) {
+export const GET_TOTAL_SALES = gql`
+  query totalSalesGenerated {
+    totalSalesGenerated {
       data
       message
       success
@@ -234,16 +161,55 @@ export const USER_MEET_BY_DATE = gql`
 `;
 
 /**
- * Sends a recovery email to the user with the provided details.
- * @param {Object} user - The user details.
- * @return {Object} A message indicating the status of the email, the user's details, and a success flag.
+ * Fetches the total sales for the current month.
+ * @return {Object} The total sales amount for the month, a message, and a success flag.
  */
-export const SEND_USER_RECOVERY = gql`
-  query sendUserRecovery($user: UserInput!) {
-    sendUserRecovery(user: $user) {
+export const GET_TOTAL_SALES_MONTH = gql`
+  query totalSalesMonth {
+    totalSalesMonth {
       data
       message
       success
     }
+  }
+`;
+
+/**
+ * Fetches the five favorite jobs.
+ * @return {Object} A list of five favorite jobs, a message, and a success flag.
+ */
+export const GET_FIVE_FAVORITE_JOBS = gql`
+  query fiveFavoritesJobs {
+    fiveFavoritesJobs {
+      data {
+        id
+        jobName
+        description
+        averageRate
+        idCategory {
+          id
+          name
+        }
+        idProfessional {
+          id
+          username
+          email
+        }
+        requestsCount
+      }
+      message
+      success
+    }
+  }
+`;
+
+/**
+ * Fetches available times for a specific date.
+ * @param {String} date - The date to fetch available times for.
+ * @return {String[]} A list of available times for the specified date.
+ */
+export const GET_AVAILABLE_TIMES = gql`
+  query getAvailableTimes($date: String!) {
+    getAvailableTimes(date: $date)
   }
 `;

@@ -110,9 +110,9 @@ export function Chat() {
       >
         <Box display="flex" flexDirection="column" height="100%">
           <Box flexGrow={1} p={2} display="flex" flexDirection="column">
-            <Typography variant="h5">{isConnected ? 'Connected' : 'Disconnected'}</Typography>
+            <Typography variant="h6">{isConnected ? 'Conectado' : 'Desconectado'}</Typography>
             <FormControl fullWidth style={{ marginTop: 20 }}>
-              <InputLabel id="select-user-label">Select User</InputLabel>
+              <InputLabel id="select-user-label">Selecionar Usuarior</InputLabel>
               <Select
                 labelId="select-user-label"
                 value={selectedUser}
@@ -139,7 +139,7 @@ export function Chat() {
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={10}>
                 <TextField
-                  label="Message"
+                  label="Mensaje"
                   fullWidth
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}

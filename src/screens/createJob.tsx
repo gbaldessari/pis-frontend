@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useMutation, useLazyQuery } from "@apollo/client";
-import { CREATE_JOB} from "../graphql/jobs.graphql";
+import { useMutation } from "@apollo/client";
+import { CREATE_JOB } from "../graphql/jobs.graphql";
 import {
   Container,
   TextField,
@@ -10,58 +10,23 @@ import {
   Grid,
   Snackbar,
 } from "@mui/material";
-import { useAuth } from "../AuthContext";
-import { GET_USER_BY_EMAIL,EDIT_USER } from "../graphql/users.graphql";
-
-type UserType = {
-    id: number;
-    username: string;
-    email: string;
-    password?: string;
-    phone: number;
-    address: string;
-    isProfessional: boolean;
-};
 
 type JobInput = {
   jobName: string;
   description: string;
   idCategory: number;
-  idProfessional: number;
+  price: number;
 };
 
 const CreateJobForm: React.FC = () => {
-  const { user } = useAuth();
   const [jobData, setJobData] = useState<JobInput>({
     jobName: "",
     description: "",
     idCategory: 0,
-    idProfessional: 0,
+    price: 0,
   });
-  const [userData, setUserData] = useState<UserType | null>(null);
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-
-  const [getUserByEmail] = useLazyQuery(GET_USER_BY_EMAIL, {
-    onCompleted: (data) => {
-      if (data.userByEmail.success) {
-        setUserData(data.userByEmail.data);
-      }
-    },
-    onError: (error) => {
-      console.error("Error fetching user data: ", error);
-      setAlertMessage("Error fetching user data");
-      setAlertOpen(true);
-    }
-  });
-
-  const [editUser] = useMutation(EDIT_USER, {
-    onError: (error) => {
-      console.error("Error editing user: ", error);
-      setAlertMessage("Error updating user data");
-      setAlertOpen(true);
-    }
-  });
 
   const [createJob, { loading }] = useMutation(CREATE_JOB, {
     onCompleted: (data) => {
@@ -75,53 +40,33 @@ const CreateJobForm: React.FC = () => {
         jobName: "",
         description: "",
         idCategory: 0,
-        idProfessional: 0,
+        price: 0,
       });
     },
     onError: (error) => {
-      console.error("Error creating job: ", error);
+      console.error("Error creando trabajo: ", error);
       setAlertMessage("Error creando trabajo");
       setAlertOpen(true);
     }
   });
 
-  useEffect(() => {
-    if (user && user.email) {
-      getUserByEmail({ variables: { email: user.email } });
-    }
-  }, [user, getUserByEmail]);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setJobData({
       ...jobData,
-      [name]: name === "idCategory" || name === "idProfessional" ? parseInt(value) : value,
+      [name]: name === "idCategory" || name === "price" ? parseInt(value) : value,
     });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (userData && !userData.isProfessional) {
-      try {
-        await editUser({
-          variables: {
-            email: userData.email,
-            username: userData.username,
-            phone: userData.phone,
-            address: userData.address,
-            isProfessional: true,
-          }
-        });
-      } catch (error) {
-        console.error("Error updating user to professional: ", error);
-        return;
-      }
-    }
     try {
       await createJob({
         variables: {
-          ...jobData,
-          idProfessional: userData?.id
+          jobName: jobData.jobName,
+          description: jobData.description,
+          idCategory: jobData.idCategory,
+          price: jobData.price
         },
       });
     } catch (error) {
@@ -142,7 +87,7 @@ const CreateJobForm: React.FC = () => {
             <form onSubmit={handleSubmit}>
               <TextField
                 name="jobName"
-                label="Job Name"
+                label="Nombre del Servicio"
                 value={jobData.jobName}
                 onChange={handleChange}
                 fullWidth
@@ -151,7 +96,7 @@ const CreateJobForm: React.FC = () => {
               />
               <TextField
                 name="description"
-                label="Description"
+                label="Descripción"
                 value={jobData.description}
                 onChange={handleChange}
                 fullWidth
@@ -160,7 +105,7 @@ const CreateJobForm: React.FC = () => {
               />
               <TextField
                 name="idCategory"
-                label="Category ID"
+                label="ID Categoria"
                 type="number"
                 value={jobData.idCategory}
                 onChange={handleChange}
@@ -169,17 +114,17 @@ const CreateJobForm: React.FC = () => {
                 sx={{ mb: 2 }}
               />
               <TextField
-                name="idProfessional"
-                label="Professional ID"
+                name="price"
+                label="Precio"
                 type="number"
-                value={jobData.idProfessional}
+                value={jobData.price}
                 onChange={handleChange}
                 fullWidth
                 required
                 sx={{ mb: 2 }}
               />
               <Button type="submit" variant="contained" fullWidth disabled={loading}>
-                {loading ? "Submitting..." : "Create Job"}
+                {loading ? "Submitting..." : "Crear Trabajo"}
               </Button>
             </form>
           </Paper>

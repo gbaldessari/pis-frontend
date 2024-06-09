@@ -1,134 +1,16 @@
 import { gql } from "@apollo/client";
 
-// ------------------- MUTATIONS ------------------- //
-
-/**
- * Creates a new job with the provided details (jobName, description, idCategory, idProfessional).
- * @return {Object} A message and a success flag.
- */
-export const CREATE_JOB = gql`
-  mutation createJob(
-    $jobName: String!,
-    $description: String!,
-    $idCategory: Int!,
-    $idProfessional: Int!
-  ) {
-    createJob(createJobInput: {
-      jobName: $jobName,
-      description: $description,
-      idCategory: $idCategory,
-      idProfessional: $idProfessional
-    }) {
-      data
-      message
-      success
-    }
-  }
-`;
-
-/**
- * Updates an existing job with the provided details (jobName, description, idCategory, idProfessional).
- * @return {Object} A message and a success flag.
- */
-export const UPDATE_JOB = gql`
-  mutation updateJob(
-    $jobName: String!,
-    $description: String,
-    $idCategory: Int,
-    $idProfessional: Int
-  ) {
-    updateJob(
-      jobName: $jobName,
-      updateJobInput: {
-        jobName: $jobName,
-        description: $description,
-        idCategory: $idCategory,
-        idProfessional: $idProfessional
-      }
-    ) {
-      data
-      message
-      success
-    }
-  }
-`;
-
-/**
- * Removes a job with the provided ID.
- * @return {Object} A message indicating the status of the removal and a success flag.
- */
-export const REMOVE_JOB = gql`
-  mutation removeJob($id: Int!) {
-    removeJob(id: $id) {
-      message
-      success
-    }
-  }
-`;
-
-/**
- * Creates a new category with the provided name.
- * @return {Object} A message and a success flag.
- */
-export const CREATE_CATEGORY = gql`
-  mutation createCategory(
-    $name: String!
-  ) {
-    createCategory(createCategoryInput: {
-      name: $name
-    }) {
-      data
-      message
-      success
-    }
-  }
-`;
-
-/**
- * Creates a new review with the provided details (comment, rate, idJob, idUser).
- * @return {Object} A message and a success flag.
- */
-export const CREATE_REVIEW = gql`
-  mutation createReview(
-    $comment: String!,
-    $rate: Int!,
-    $idJob: Int!,
-    $idUser: Int!
-  ) {
-    createReview(createReviewInput: {
-      comment: $comment,
-      rate: $rate,
-      idJob: $idJob,
-      idUser: $idUser
-    }) {
-      data {
-        id
-        comment
-        rate
-        idJob {
-          id
-          jobName
-        }
-        idUser {
-          id
-          username
-          email
-        }
-      }
-      message
-      success
-    }
-  }
-`;
-
 // ------------------- QUERIES ------------------- //
+
+
+// ------------------- Jobs ------------------- //
 
 /**
  * Fetches a list of all jobs.
- * @return {Array} A list of jobs.
+ * @return {Object[]} A list of jobs.
  */
 export const GET_JOBS = gql`
-  query {
+  query jobs {
     jobs {
       id
       jobName
@@ -140,9 +22,11 @@ export const GET_JOBS = gql`
       }
       idProfessional {
         id
+        username
         email
       }
       requestsCount
+      price
     }
   }
 `;
@@ -150,7 +34,7 @@ export const GET_JOBS = gql`
 /**
  * Fetches a job by its name.
  * @param {String} name - The name of the job to fetch.
- * @return {Object} The job's details and a success flag.
+ * @return {Object} The job details, a message, and a success flag.
  */
 export const GET_JOB_BY_NAME = gql`
   query jobByName($name: String!) {
@@ -166,9 +50,11 @@ export const GET_JOB_BY_NAME = gql`
         }
         idProfessional {
           id
+          username
           email
         }
         requestsCount
+        price
       }
       success
     }
@@ -176,11 +62,11 @@ export const GET_JOB_BY_NAME = gql`
 `;
 
 /**
- * Fetches jobs by their category.
- * @param {String} category - The category of the jobs to fetch.
- * @return {Object} The list of jobs, a message, and a success flag.
+ * Fetches jobs by category.
+ * @param {String} category - The category to filter jobs by.
+ * @return {Object[]} A list of jobs in the specified category, a message, and a success flag.
  */
-export const GET_JOB_BY_CATEGORY = gql`
+export const GET_JOBS_BY_CATEGORY = gql`
   query jobByCategory($category: String!) {
     jobByCategory(category: $category) {
       data {
@@ -194,9 +80,11 @@ export const GET_JOB_BY_CATEGORY = gql`
         }
         idProfessional {
           id
+          username
           email
         }
         requestsCount
+        price
       }
       message
       success
@@ -207,7 +95,7 @@ export const GET_JOB_BY_CATEGORY = gql`
 /**
  * Fetches a job by its ID.
  * @param {Int} id - The ID of the job to fetch.
- * @return {Object} The job's details and a success flag.
+ * @return {Object} The job details, a message, and a success flag.
  */
 export const GET_JOB_BY_ID = gql`
   query jobById($id: Int!) {
@@ -223,21 +111,25 @@ export const GET_JOB_BY_ID = gql`
         }
         idProfessional {
           id
+          username
           email
         }
         requestsCount
+        price
       }
       success
     }
   }
 `;
 
+// ------------------- Categories ------------------- //
+
 /**
  * Fetches a list of all categories.
- * @return {Array} A list of categories.
+ * @return {Object[]} A list of categories.
  */
 export const GET_CATEGORIES = gql`
-  query {
+  query categories {
     categories {
       id
       categoryName
@@ -248,7 +140,7 @@ export const GET_CATEGORIES = gql`
 /**
  * Fetches a category by its ID.
  * @param {Int} id - The ID of the category to fetch.
- * @return {Object} The category's details and a success flag.
+ * @return {Object} The category details, a message, and a success flag.
  */
 export const GET_CATEGORY_BY_ID = gql`
   query categoryById($id: Int!) {
@@ -265,7 +157,7 @@ export const GET_CATEGORY_BY_ID = gql`
 /**
  * Fetches a category by its name.
  * @param {String} name - The name of the category to fetch.
- * @return {Object} The category's details and a success flag.
+ * @return {Object} The category details, a message, and a success flag.
  */
 export const GET_CATEGORY_BY_NAME = gql`
   query categoryByName($name: String!) {
@@ -279,15 +171,16 @@ export const GET_CATEGORY_BY_NAME = gql`
   }
 `;
 
+// ------------------- Reviews ------------------- //
+
 /**
- * Checks if a review exists for a given job and user.
- * @param {Int} idJob - The ID of the job.
- * @param {Int} idUser - The ID of the user.
+ * Checks if a review exists for a specific job.
+ * @param {Int} idJob - The ID of the job to check.
  * @return {Object} A message and a success flag.
  */
 export const EXIST_REVIEW = gql`
-  query existReview($idJob: Int!, $idUser: Int!) {
-    existReview(idJob: $idJob, idUser: $idUser) {
+  query existReview($idJob: Int!) {
+    existReview(idJob: $idJob) {
       message
       success
     }
@@ -297,7 +190,7 @@ export const EXIST_REVIEW = gql`
 /**
  * Fetches a review by its ID.
  * @param {Int} id - The ID of the review to fetch.
- * @return {Object} The review's details and a success flag.
+ * @return {Object} The review details, a message, and a success flag.
  */
 export const GET_REVIEW_BY_ID = gql`
   query getReviewById($id: Int!) {
@@ -324,10 +217,10 @@ export const GET_REVIEW_BY_ID = gql`
 
 /**
  * Fetches a list of all reviews.
- * @return {Array} A list of reviews.
+ * @return {Object[]} A list of reviews.
  */
 export const GET_REVIEWS = gql`
-  query {
+  query reviews {
     reviews {
       id
       comment
@@ -341,6 +234,173 @@ export const GET_REVIEWS = gql`
         username
         email
       }
+    }
+  }
+`;
+
+/**
+ * Fetches reviews for a specific job.
+ * @param {Int} idJob - The ID of the job to fetch reviews for.
+ * @return {Object[]} A list of reviews for the specified job, a message, and a success flag.
+ */
+export const GET_REVIEWS_BY_JOB = gql`
+  query getReviewsByJob($idJob: Int!) {
+    getReviewsByJob(idJob: $idJob) {
+      data {
+        id
+        comment
+        rate
+        idJob {
+          id
+          jobName
+        }
+        idUser {
+          id
+          username
+          email
+        }
+      }
+      message
+      success
+    }
+  }
+`;
+
+// ------------------- MUTATIONS ------------------- //
+
+// ------------------- Jobs ------------------- //
+
+/**
+ * Creates a new job.
+ * @return {Object} A message and a success flag.
+ */
+export const CREATE_JOB = gql`
+  mutation createJob(
+    $jobName: String!,
+    $description: String!,
+    $idCategory: Int!,
+    $price: Int!
+  ) {
+    createJob(createJobInput: {
+      jobName: $jobName,
+      description: $description,
+      idCategory: $idCategory,
+      price: $price
+    }) {
+      data
+      message
+      success
+    }
+  }
+`;
+
+/**
+ * Updates an existing job.
+ * @param {String} jobName - The name of the job to update.
+ * @return {Object} A message and a success flag.
+ */
+export const UPDATE_JOB = gql`
+  mutation updateJob(
+    $jobName: String!,
+    $description: String,
+    $idCategory: Int,
+    $requestsCount: Int,
+    $price: Int
+  ) {
+    updateJob(jobName: $jobName, updateJobInput: {
+      description: $description,
+      idCategory: $idCategory,
+      requestsCount: $requestsCount,
+      price: $price
+    }) {
+      data
+      message
+      success
+    }
+  }
+`;
+
+/**
+ * Removes a job by its ID.
+ * @param {Int} id - The ID of the job to remove.
+ * @return {Object} A message and a success flag.
+ */
+export const REMOVE_JOB = gql`
+  mutation removeJob($id: Int!) {
+    removeJob(id: $id) {
+      message
+      success
+    }
+  }
+`;
+
+// ------------------- Categories ------------------- //
+
+/**
+ * Creates a new category.
+ * @param {String} name - The name of the category.
+ * @return {Object} A message and a success flag.
+ */
+export const CREATE_CATEGORY = gql`
+  mutation createCategory($name: String!) {
+    createCategory(createCategoryInput: {name: $name}) {
+      data
+      message
+      success
+    }
+  }
+`;
+
+// ------------------- Reviews ------------------- //
+
+/**
+ * Creates a new review.
+ * @param {String} comment - The comment of the review.
+ * @param {Int} rate - The rating of the review.
+ * @param {Int} idJob - The ID of the job being reviewed.
+ * @return {Object} The review details, a message, and a success flag.
+ */
+export const CREATE_REVIEW = gql`
+  mutation createReview(
+    $comment: String!,
+    $rate: Int!,
+    $idJob: Int!
+  ) {
+    createReview(createReviewInput: {
+      comment: $comment,
+      rate: $rate,
+      idJob: $idJob
+    }) {
+      data {
+        id
+        comment
+        rate
+        idJob {
+          id
+          jobName
+        }
+        idUser {
+          id
+          username
+          email
+        }
+      }
+      message
+      success
+    }
+  }
+`;
+
+/**
+ * Removes a review by its ID.
+ * @param {Int} id - The ID of the review to remove.
+ * @return {Object} A message and a success flag.
+ */
+export const REMOVE_REVIEW = gql`
+  mutation removeReview($id: Int!) {
+    removeReview(id: $id) {
+      message
+      success
     }
   }
 `;

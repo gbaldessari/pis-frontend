@@ -1,6 +1,4 @@
 import React from 'react';
-import { useQuery } from '@apollo/client';
-import { GET_JOBS } from '../graphql/jobs.graphql';
 import {
   Card,
   CardActionArea,
@@ -42,12 +40,6 @@ const ServiceList: React.FC<{ services: any[] }> = ({ services }) => {
               <Typography variant="h5" component="h2">
                 {service.jobName}
               </Typography>
-              <Typography variant="body1" color="textSecondary" gutterBottom>
-                Precio: {service.price} {/* Mostrar el precio */}
-              </Typography>
-              <Typography variant="body1" color="textSecondary" gutterBottom>
-                Profesional: {service.idProfessional.username} {/* Mostrar el nombre del profesional */}
-              </Typography>
               <StarRating stars={service.averageRate} />
             </CardContent>
           </CardActionArea>
@@ -71,7 +63,7 @@ const ServiceList: React.FC<{ services: any[] }> = ({ services }) => {
             </Accordion>
           </CardActions>
           <Button fullWidth>
-            Agregar
+            Ver
           </Button>
         </Card>
       ))}
@@ -79,18 +71,36 @@ const ServiceList: React.FC<{ services: any[] }> = ({ services }) => {
   );
 };
 
-export const ServicesExample: React.FC = () => {
-  const { data, loading, error } = useQuery(GET_JOBS);
+const mockServices = [
+  {
+    id: "1",
+    jobName: "Desarrollador Frontend",
+    averageRate: 4,
+    description: "Desarrollo de interfaces de usuario usando React.js y Redux."
+  },
+  {
+    id: "2",
+    jobName: "Desarrollador Backend",
+    averageRate: 5,
+    description: "Desarrollo de API RESTful con Node.js y Express."
+  },
+  {
+    id: "3",
+    jobName: "Diseñador UX/UI",
+    averageRate: 3,
+    description: "Diseño de experiencias de usuario y interfaces atractivas."
+  }
+];
 
-  if (loading) return <p>Cargando...</p>;
-  if (error) return <p>Error :</p>;
+export const ServicesExample1: React.FC = () => {
+  const services = mockServices;
 
   return (
     <div>
       <h1>Lista de Servicios</h1>
-      <ServiceList services={data.jobs} />
+      <ServiceList services={services} />
     </div>
   );
 };
 
-export default ServicesExample;
+export default ServicesExample1;

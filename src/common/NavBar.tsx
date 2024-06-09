@@ -16,7 +16,7 @@ export const NavBar: React.FC<{}> = () => {
                 <Typography variant="h6" component="div">
                   PapaJobs
                 </Typography>
-                <img src={Logo} alt="logo" width="100" />
+                <img src={Logo} alt="logo" width="60" />
               </Grid>
               <Grid item>
                 <Stack direction="row" spacing={2}>

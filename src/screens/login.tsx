@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Grid, Paper, Typography, TextField, Button } from "@mui/material";
+import { Container, Grid, Paper, Typography, TextField, Button, Snackbar } from "@mui/material";
 import { useMutation } from "@apollo/client";
 import { LOGIN_USER } from "../graphql/users.graphql";
 import Cookies from "js-cookie";
@@ -19,25 +19,31 @@ export const LoginPage: React.FC<{}> = () => {
   });
 
   const [errors, setErrors] = useState<Partial<LoginType>>({});
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   const [login, { loading, error }] = useMutation(LOGIN_USER, {
     onCompleted: (data) => {
-      if (data && data.login && data.login.data && data.login.data.token) {
-        const token = data.login.data.token;
-        Cookies.set("auth-token", token);
-        console.log (data.login.data.token);
-        navigate("/home");
+      if (data && data.login) {
+        if (data.login.success) {
+          const token = data.login.data.token;
+          Cookies.set("auth-token", token);
+          navigate("/home");
+        } else {
+          setAlertMessage(data.login.message);
+          setAlertOpen(true);
+        }
       } else {
-        console.error("Formato de datos inesperado devuelto desde el servidor:", data);
+        setAlertMessage("Formato de datos inesperado devuelto desde el servidor");
+        setAlertOpen(true);
       }
     },
     onError: (error) => {
       console.error("Error en la mutación:", error);
+      setAlertMessage("Error en el servidor. Inténtalo de nuevo más tarde.");
+      setAlertOpen(true);
     }
   });
-
-  if (loading) return 'Submitting...';
-  if (error) return `Submission error! ${error.message}`;
 
   const dataLogin = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -70,6 +76,10 @@ export const LoginPage: React.FC<{}> = () => {
         password: loginData.password,
       },
     });
+  };
+
+  const handleAlertClose = () => {
+    setAlertOpen(false);
   };
 
   return (
@@ -108,7 +118,7 @@ export const LoginPage: React.FC<{}> = () => {
                 value={loginData.password}
               />
               <Button fullWidth type="submit" variant="contained" sx={{ mt: 1.5, mb: 1 }}>
-                Iniciar Sesión
+                {loading ? "Submitting..." : "Iniciar Sesión"}
               </Button>
             </form>
             <Button fullWidth variant="text" sx={{ mt: 1 }} onClick={() => navigate("/forgotten")}>
@@ -117,6 +127,18 @@ export const LoginPage: React.FC<{}> = () => {
           </Paper>
         </Grid>
       </Grid>
+
+      <Snackbar
+        open={alertOpen}
+        autoHideDuration={6000}
+        onClose={handleAlertClose}
+        message={alertMessage}
+        action={
+          <Button color="inherit" size="small" onClick={handleAlertClose}>
+            Cerrar
+          </Button>
+        }
+      />
     </Container>
   );
-};    
+};
