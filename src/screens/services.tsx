@@ -81,7 +81,9 @@ const ServiceList: React.FC<{ services: any[] }> = ({ services }) => {
 
 export const ServicesExample: React.FC = () => {
   const { data, loading, error } = useQuery(GET_JOBS);
-
+  console.log('Loading:', loading);
+  console.log('Error:', error);
+  console.log('Data:', data);
   if (loading) return <p>Cargando...</p>;
   if (error) return <p>Error :</p>;
 

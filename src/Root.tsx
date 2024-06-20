@@ -8,7 +8,10 @@ import {ForgottenPasswordPage} from "./screens/forgotten";
 import {RegisterPage} from "./screens/register";
 import  ProtectedRoute  from "./ProtectdeRoutes";
 import CreateJobForm from "./screens/createJob";
-import ServicesExample from "./screens/services";
+import ServicesExample from "./screens/services.meet";
+import UserMeets from "./screens/user.meets";
+import EditProfile from "./screens/user.profile.edit";
+import ViewProfile from "./screens/user.profile";
 
 
 export const AppRoutes: React.FC<{}> = () => {
@@ -20,6 +23,9 @@ export const AppRoutes: React.FC<{}> = () => {
       <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
       <Route path="/create-job" element={<ProtectedRoute><CreateJobForm/></ProtectedRoute>} />
       <Route path="/services" element={<ProtectedRoute><ServicesExample/></ProtectedRoute>} />
+      <Route path="/userMeets" element={<ProtectedRoute><UserMeets/></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><ViewProfile/></ProtectedRoute>} />
+      <Route path="/edit-profile" element={<ProtectedRoute><EditProfile/></ProtectedRoute>} />
       </Route>
       {/**RUTAS NO PROTEGIDAS */}
       <Route path="/login" element={<LoginPage/>} />

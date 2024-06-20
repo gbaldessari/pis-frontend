@@ -9,9 +9,11 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { ApolloClient, ApolloProvider, HttpLink, InMemoryCache } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import Cookies from "js-cookie";
+import { AuthProvider } from "./AuthContext.tsx";
 
 const authLink = setContext((_, { headers }) => {
-  const token = Cookies.get("auth-token");
+  const token = Cookies.get('token');
+  console.log(token);
   return {
     headers: {
       ...headers,
@@ -41,10 +43,12 @@ const router = createBrowserRouter([
 <RouterProvider router={router} />
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <ApolloProvider client={client}>
+    <AuthProvider>
     <React.StrictMode>
       <ThemeConfig>
       <App />
       </ThemeConfig>
     </React.StrictMode>
+    </AuthProvider>
   </ApolloProvider> 
 );

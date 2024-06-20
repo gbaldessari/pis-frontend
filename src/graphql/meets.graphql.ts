@@ -44,11 +44,6 @@ export const GET_MEETS = gql`
   }
 `;
 
-/**
- * Fetches a meet by its ID.
- * @param {Int} id - The ID of the meet to fetch.
- * @return {Object} The meet details and a success flag.
- */
 export const GET_MEET = gql`
   query meet($id: Int!) {
     meet(id: $id) {
@@ -67,6 +62,8 @@ export const GET_MEET = gql`
             id
             username
             email
+            phone
+            address
           }
           requestsCount
         }
@@ -76,7 +73,6 @@ export const GET_MEET = gql`
           email
           phone
           address
-          isProfessional
         }
         meetDate
         startTime
@@ -88,6 +84,45 @@ export const GET_MEET = gql`
   }
 `;
 
+/**
+ 
+Fetches the meets of the current logged-in user.
+@return {Object[]} A list of meets for the user.
+*/
+export const GET_USER_MEETS = gql`
+  query getUserMeets {
+    getUserMeets {
+    data{
+      id
+      idJob {
+        id
+        jobName
+        description
+        averageRate
+        idCategory {
+          id
+          categoryName
+        }
+        idProfessional {
+          id
+          username
+          email
+        }
+        requestsCount
+      }
+      idUser {
+        id
+        username
+        email
+      }
+      meetDate
+      startTime
+      endTime
+      isDone
+    }
+  }
+  }
+`;
 // ------------------- MUTATIONS ------------------- //
 
 // ------------------- Meets ------------------- //
@@ -176,3 +211,4 @@ export const REMOVE_MEET = gql`
     }
   }
 `;
+

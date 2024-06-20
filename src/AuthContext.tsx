@@ -25,7 +25,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [verifyToken] = useMutation(VERIFY_TOKEN);
 
   useEffect(() => {
-    const token = Cookies.get('auth-token');
+    const token = Cookies.get('token');
     if (token) {
       verifyToken({
         variables: {
@@ -37,17 +37,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           setUser(userData);
           setIsAuthenticated(true);
         } else {
-          Cookies.remove('auth-token');
+          Cookies.remove('token');
         }
       }).catch((error) => {
         console.error('Error verifying token:', error);
-        Cookies.remove('auth-token');
+        Cookies.remove('token');
       });
     }
   }, [verifyToken]);
 
   const logout = () => {
-    Cookies.remove('auth-token');
+    Cookies.remove('token');
     setUser(null);
     setIsAuthenticated(false);
   };
@@ -58,11 +58,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     </AuthContext.Provider>
   );
 };
-
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}
+};

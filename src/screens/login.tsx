@@ -27,7 +27,7 @@ export const LoginPage: React.FC<{}> = () => {
       if (data && data.login) {
         if (data.login.success) {
           const token = data.login.data.token;
-          Cookies.set("auth-token", token);
+          Cookies.set("token", token);
           navigate("/home");
         } else {
           setAlertMessage(data.login.message);

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { GET_JOBS } from '../graphql/jobs.graphql';
 import { CREATE_MEET } from '../graphql/meets.graphql';
+
 import {
   Card,
   CardActionArea,
@@ -66,9 +67,7 @@ const ServiceList: React.FC<{ services: any[] }> = ({ services }) => {
   });
 
   const handleVerClick = (jobId: number) => {
-    // Mostrar campos de edición al hacer clic en "Agregar"
     setShowEditFields(true);
-    // Actualizar el id del trabajo seleccionado
     setMeetDetails({
       ...meetDetails,
       idJob: jobId
@@ -76,11 +75,13 @@ const ServiceList: React.FC<{ services: any[] }> = ({ services }) => {
   };
 
   const handleSubmit = () => {
-    // Crear el encuentro cuando se envía el formulario
     createMeet({
       variables: meetDetails
     });
-    // Ocultar los campos de edición después de crear el encuentro
+    setShowEditFields(false);
+  };
+
+  const handleCancel = () => {
     setShowEditFields(false);
   };
 
@@ -155,22 +156,25 @@ const ServiceList: React.FC<{ services: any[] }> = ({ services }) => {
                 aria-controls="panel1-content"
                 id="panel1-header"
                 style={{ display: "flex", justifyContent: "space-between" }}
-              > 
+              >
                 <Typography>Descripción</Typography>
               </AccordionSummary>
               <AccordionDetails>
-                <Typography>
-                  <Typography color="textSecondary" gutterBottom>
-                    {service.description} 
-                  </Typography>
+                <Typography color="textSecondary" gutterBottom>
+                  {service.description}
                 </Typography>
               </AccordionDetails>
             </Accordion>
           </CardActions>
           {showEditFields && (
-            <Button fullWidth onClick={handleSubmit}>
-              Crear Encuentro
-            </Button>
+            <>
+              <Button fullWidth onClick={handleSubmit}>
+                Crear Encuentro
+              </Button>
+              <Button fullWidth onClick={handleCancel}>
+                Cancelar
+              </Button>
+            </>
           )}
           {!showEditFields && (
             <Button fullWidth onClick={() => handleVerClick(service.id)}>
