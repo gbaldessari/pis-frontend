@@ -54,6 +54,7 @@ const MenuBar: React.FC = () => {
 
   const menuItems = [
     { text: 'Mis Reuniones', icon: <Bookmark /> },
+    { text: 'Servicios Disponibles', icon: <Business /> },
     { text: 'Home', icon: <Home /> },
     { text: 'Perfil', icon: <Person2 /> },
     { text: 'Comentarios', icon: <ModeCommentOutlined /> },
@@ -63,7 +64,6 @@ const MenuBar: React.FC = () => {
   
   if ( data.user.data.isProfessional) {
     menuItems.push(
-      { text: 'Servicios Disponibles', icon: <Business /> },
       { text: 'Reuniones Profesional', icon: <Storage /> }
     );
   }

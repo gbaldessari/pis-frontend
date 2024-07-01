@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
-import { Card, CardActionArea, CardContent, Typography, CardActions, Button, Accordion, AccordionSummary, AccordionDetails, TextField, CircularProgress, List, ListItem, ListItemText } from "@mui/material";
+import {Container, Card, CardActionArea, CardContent, Typography, CardActions, Button, Accordion, AccordionSummary, AccordionDetails, TextField, CircularProgress, List, ListItem, ListItemText, Alert } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
@@ -51,6 +51,7 @@ const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [showEditFields, setShowEditFields] = useState(false);
   const [loadingReviews, setLoadingReviews] = useState(false);
+  const [alertMessage, setAlertMessage] = useState<string | null>(null); // Estado para el mensaje de alerta
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -63,12 +64,15 @@ const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
   const [createMeet] = useMutation(CREATE_MEET, {
     onCompleted: (data) => {
       if (data.createMeet.success) {
+        setAlertMessage("¡Encuentro creado con éxito!");
         console.log("Encuentro creado con éxito:", data.createMeet.data);
       } else {
+        setAlertMessage(`Error al crear el encuentro: ${data.createMeet.message}`);
         console.error("Error al crear el encuentro:", data.createMeet.message);
       }
     },
     onError: (error) => {
+      setAlertMessage(`Error en la mutación CREATE_MEET: ${error.message}`);
       console.error("Error en la mutación CREATE_MEET:", error);
     }
   });
@@ -215,6 +219,11 @@ const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
               ))}
             </List>
           )}
+          {alertMessage && (
+            <Alert severity={alertMessage.includes("Error") ? "error" : "success"} sx={{ marginTop: 2 }}>
+              {alertMessage}
+            </Alert>
+          )}
         </Card>
       ))}
     </div>
@@ -224,14 +233,14 @@ const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
 export const ServicesExample: React.FC = () => {
   const { data, loading, error } = useQuery(GET_JOBS);
 
-  if (loading) return <p>Cargando...</p>;
-  if (error) return <p>Error :</p>;
+  if (loading) return <CircularProgress />;
+  if (error) return <Alert severity="error">{`Error: ${error.message}`}</Alert>;
 
   return (
-    <div>
-      <h1>Lista de Servicios</h1>
+    <Container maxWidth="md">
+      <Typography variant="h4" gutterBottom>Lista de Servicios</Typography>
       <ServiceList services={data.jobs} />
-    </div>
+    </Container>
   );
 };
 
