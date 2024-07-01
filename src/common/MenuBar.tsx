@@ -1,7 +1,9 @@
 import React from 'react';
 import { useQuery } from '@apollo/client';
 import { Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar, CssBaseline, CircularProgress, Alert } from '@mui/material';
-import { Business, AddBusiness, Logout, Bookmark, Person2, Home } from '@mui/icons-material';
+import { Business, AddBusiness, Logout, Bookmark, Person2, Home, ModeCommentOutlined, AddComment, Storage } from '@mui/icons-material';
+
+
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import Cookies from 'js-cookie';
@@ -27,6 +29,12 @@ const MenuBar: React.FC = () => {
       navigate('/home');
     } else if (text === 'Mis Reuniones') {
       navigate('/userMeets');
+    } else if (text === 'Comentarios') {
+      navigate('/review');
+    }  else if (text === 'Hacer Comentario') {
+      navigate('/create-review');
+    }else if (text === 'Reuniones Profesional') {
+      navigate('/profMeets');
     } else if (text === 'Perfil') {
       navigate('/profile');
     }
@@ -41,7 +49,12 @@ const MenuBar: React.FC = () => {
     { text: 'Agregar Servicios', icon: <AddBusiness /> },
     { text: 'Home', icon: <Home /> },
     { text: 'Perfil', icon: <Person2 /> },
+    { text: 'Reuniones Profesional',icon: <Storage/>},
+    { text: 'Comentarios', icon: <ModeCommentOutlined/>},
+    { text: 'Hacer Comentario', icon : <AddComment/>},
     { text: 'Logout', icon: <Logout /> }
+    
+
   ];
 
   {/**if (data.user.isProfessional) {

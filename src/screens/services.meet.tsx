@@ -125,7 +125,7 @@ const ServiceList: React.FC<{ services: any[] }> = ({ services }) => {
                       shrink: true,
                     }}
                     inputProps={{
-                      step: 300, // 5 minutos
+                      step: 300, 
                     }}
                     style={{ marginBottom: 10 }}
                   />
@@ -140,7 +140,7 @@ const ServiceList: React.FC<{ services: any[] }> = ({ services }) => {
                       shrink: true,
                     }}
                     inputProps={{
-                      step: 300, // 5 minutos
+                      step: 300, 
                     }}
                     style={{ marginBottom: 10 }}
                   />

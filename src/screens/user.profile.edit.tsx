@@ -8,11 +8,10 @@ const EditProfile: React.FC = () => {
   const navigate = useNavigate();
   const { loading, error, data } = useQuery(GET_USER);
   const [editUser] = useMutation(EDIT_USER);
-  
+
   const [formData, setFormData] = useState({
     username: '',
     email: '',
-    password: '',
     phone: '',
     address: '',
     isProfessional: false
@@ -23,10 +22,9 @@ const EditProfile: React.FC = () => {
       setFormData({
         username: data.user.data.username,
         email: data.user.data.email,
-        password: '',
         phone: data.user.data.phone,
         address: data.user.data.address,
-        isProfessional: data.user.data.isProfessional
+        isProfessional: data.user.data.isProfessional 
       });
     }
   }, [data]);
@@ -41,13 +39,14 @@ const EditProfile: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     try {
       const { data } = await editUser({ variables: { ...formData, phone: parseInt(formData.phone) } });
       if (data.editUser.success) {
-        alert('User details updated successfully');
+        alert('Se han guardado los cambios');
         navigate('/profile');
       } else {
-        alert('Failed to update user details');
+        alert('Error al hacer los cambios');
       }
     } catch (err) {
       console.error(err);
@@ -58,7 +57,7 @@ const EditProfile: React.FC = () => {
   if (error) return <Alert severity="error">Error: {error.message}</Alert>;
 
   return (
-    <Box sx={{ ml: 11 }}> {/* Ajuste del margen izquierdo */}
+    <Box sx={{ ml: 11 }}> 
       <Container>
         <Typography variant="h4" gutterBottom>Edit Profile</Typography>
         <form onSubmit={handleSubmit}>
@@ -80,15 +79,6 @@ const EditProfile: React.FC = () => {
             margin="normal"
           />
           <TextField
-            label="Password"
-            name="password"
-            type="password"
-            value={formData.password}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-          />
-          <TextField
             label="Phone"
             name="phone"
             value={formData.phone}
@@ -104,18 +94,16 @@ const EditProfile: React.FC = () => {
             fullWidth
             margin="normal"
           />
-          {!formData.isProfessional && (
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={formData.isProfessional}
-                  onChange={handleChange}
-                  name="isProfessional"
-                />
-              }
-              label="Professional"
-            />
-          )}
+          <FormControlLabel
+            control={
+              <Switch
+                checked={formData.isProfessional}
+                onChange={handleChange}
+                name="isProfessional"
+              />
+            }
+            label="Professional"
+          />
           <Button variant="contained" color="primary" type="submit">Save</Button>
         </form>
       </Container>

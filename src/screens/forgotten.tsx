@@ -38,8 +38,7 @@ export const ForgottenPasswordPage: React.FC<{}> = () => {
       return;
     }
 
-    // Aquí puedes agregar la lógica para enviar la recuperación de contraseña
-    // Por ahora, simplemente redirigimos al usuario a otra página
+
     navigate("/home");
   };
 

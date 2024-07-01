@@ -12,6 +12,9 @@ import ServicesExample from "./screens/services.meet";
 import UserMeets from "./screens/user.meets";
 import EditProfile from "./screens/user.profile.edit";
 import ViewProfile from "./screens/user.profile";
+import CreateReview from "./screens/createReview";
+import ViewReviews from "./screens/review";
+import ProfMeets from "./screens/meet.prof";
 
 
 export const AppRoutes: React.FC<{}> = () => {
@@ -25,7 +28,10 @@ export const AppRoutes: React.FC<{}> = () => {
       <Route path="/services" element={<ProtectedRoute><ServicesExample/></ProtectedRoute>} />
       <Route path="/userMeets" element={<ProtectedRoute><UserMeets/></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><ViewProfile/></ProtectedRoute>} />
-      <Route path="/edit-profile" element={<ProtectedRoute><EditProfile/></ProtectedRoute>} />
+      <Route path="/edit-profile" element={<ProtectedRoute><EditProfile/></ProtectedRoute>} /> 
+      <Route path="/review" element={<ProtectedRoute><ViewReviews/></ProtectedRoute>} />
+      <Route path="/create-review" element={<ProtectedRoute><CreateReview/></ProtectedRoute>} />
+      <Route path="/profMeets" element={<ProtectedRoute><ProfMeets/></ProtectedRoute>} />
       </Route>
       {/**RUTAS NO PROTEGIDAS */}
       <Route path="/login" element={<LoginPage/>} />

@@ -16,7 +16,7 @@ const ViewProfile: React.FC = () => {
   if (error) return <Alert severity="error">Error: {error.message}</Alert>;
 
   return (
-    <Container maxWidth="sm">
+    <Container maxWidth="sm" style={{ marginLeft: '300px' }}>
       <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
         <Typography variant="h4" gutterBottom align="center">Perfil de usuario</Typography>
         <Grid container spacing={2}>
