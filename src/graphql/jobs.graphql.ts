@@ -352,14 +352,6 @@ export const CREATE_CATEGORY = gql`
 `;
 
 // ------------------- Reviews ------------------- //
-
-/**
- * Creates a new review.
- * @param {String} comment - The comment of the review.
- * @param {Int} rate - The rating of the review.
- * @param {Int} idJob - The ID of the job being reviewed.
- * @return {Object} The review details, a message, and a success flag.
- */
 export const CREATE_REVIEW = gql`
   mutation createReview(
     $comment: String!,
@@ -375,11 +367,11 @@ export const CREATE_REVIEW = gql`
         id
         comment
         rate
-        idJob {
+        job {
           id
           jobName
         }
-        idUser {
+        user {
           id
           username
           email
@@ -389,6 +381,61 @@ export const CREATE_REVIEW = gql`
       success
     }
   }
+`;
+
+
+/**Fetches a list of all jobs.
+@return {Object[]} A list of jobs.
+*/
+export const GET_PROFESSIONAL_JOBS = gql`
+query getProfessionalJobs {
+  getProfessionalJobs {
+    data {
+      id
+      jobName
+      description
+      averageRate
+      idCategory {
+        id
+        categoryName
+      }
+      idProfessional {
+        id
+        username
+        email
+      }
+      requestsCount
+    }
+    message
+    success
+  }
+}
+`;
+
+/**Fetches a list of all reviews.
+@return {Object[]} A list of reviews.
+*/
+export const GET_USER_REVIEWS = gql`
+query getUserReviews {
+  getUserReviews {
+    data {
+      id
+      comment
+      rate
+      idJob {
+        id
+        jobName
+      }
+      idUser {
+        id
+        username
+        email
+      }
+    }
+    message
+    success
+  }
+}
 `;
 
 /**

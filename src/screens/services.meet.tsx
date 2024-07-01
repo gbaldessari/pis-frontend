@@ -1,28 +1,11 @@
-
 import React, { useState } from 'react';
-import { useQuery, useLazyQuery, useMutation } from '@apollo/client';
-import { GET_JOBS } from '../graphql/jobs.graphql';
-import { CREATE_MEET } from '../graphql/meets.graphql';
-import { GET_REVIEWS_BY_JOB } from '../graphql/jobs.graphql';
-import {
-  Card,
-  CardActionArea,
-  CardContent,
-  Typography,
-  CardActions,
-  Button,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  TextField,
-  CircularProgress,
-  List,
-  ListItem,
-  ListItemText
-} from "@mui/material";
+import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
+import { Card, CardActionArea, CardContent, Typography, CardActions, Button, Accordion, AccordionSummary, AccordionDetails, TextField, CircularProgress, List, ListItem, ListItemText } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import { CREATE_MEET } from '../graphql/meets.graphql';
+import { GET_REVIEWS_BY_JOB, GET_JOBS } from '../graphql/jobs.graphql';
 
 interface Service {
   id: number;
@@ -90,8 +73,9 @@ const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
     }
   });
 
-  const [getReviewsByService] = useLazyQuery(GET_REVIEWS_BY_JOB, {
+  const [getReviewsByService, { loading: reviewsLoading }] = useLazyQuery(GET_REVIEWS_BY_JOB, {
     onCompleted: (data) => {
+      console.log(data);
       setReviews(data.getReviewsByJob.data);
       setLoadingReviews(false);
     },
@@ -162,7 +146,7 @@ const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
                       shrink: true,
                     }}
                     inputProps={{
-                      step: 300, 
+                      step: 300,
                     }}
                     style={{ marginBottom: 10 }}
                   />
@@ -177,7 +161,7 @@ const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
                       shrink: true,
                     }}
                     inputProps={{
-                      step: 300, 
+                      step: 300,
                     }}
                     style={{ marginBottom: 10 }}
                   />

@@ -33,8 +33,8 @@ const UserMeets: React.FC = () => {
         );
     }
 
-    const handleFinishMeet = (id: string) => {
-        finishMeet({ variables: { id } });
+    const handleFinishMeet = (id: string) => {     
+        finishMeet({ variables: { idMeet: parseInt(id) } })
     };
 
     const meets = data?.getUserMeets?.data || [];

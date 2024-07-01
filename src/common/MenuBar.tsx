@@ -2,10 +2,7 @@ import React from 'react';
 import { useQuery } from '@apollo/client';
 import { Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar, CssBaseline, CircularProgress, Alert } from '@mui/material';
 import { Business, AddBusiness, Logout, Bookmark, Person2, Home, ModeCommentOutlined, AddComment, Storage } from '@mui/icons-material';
-
-
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
 import Cookies from 'js-cookie';
 import { GET_USER } from '../graphql/users.graphql';
 
@@ -13,53 +10,66 @@ const drawerWidth = 240;
 
 const MenuBar: React.FC = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
-  //const { loading, error, data } = useQuery(GET_USER);
+  const { loading, error, data } = useQuery(GET_USER);
+
 
   const handleListItemClick = (text: string) => {
-    if (text === 'Servicios Disponibles') {
-      navigate('/services');
-    } else if (text === 'Agregar Servicios') {
-      navigate('/create-job');
-    } else if (text === 'Logout') {
-      logout();
-      Cookies.remove('token');
-      navigate('/login');
-    } else if (text === 'Home') {
-      navigate('/home');
-    } else if (text === 'Mis Reuniones') {
-      navigate('/userMeets');
-    } else if (text === 'Comentarios') {
-      navigate('/review');
-    }  else if (text === 'Hacer Comentario') {
-      navigate('/create-review');
-    }else if (text === 'Reuniones Profesional') {
-      navigate('/profMeets');
-    } else if (text === 'Perfil') {
-      navigate('/profile');
+    switch (text) {
+      case 'Servicios Disponibles':
+        navigate('/services');
+        break;
+      case 'Agregar Servicios':
+        navigate('/create-job');
+        break;
+      case 'Logout':
+        Cookies.remove('token');
+        window.location.reload();
+        navigate('/login');
+        break;
+      case 'Home':
+        navigate('/home');
+        break;
+      case 'Mis Reuniones':
+        navigate('/userMeets');
+        break;
+      case 'Comentarios':
+        navigate('/review');
+        break;
+      case 'Hacer Comentario':
+        navigate('/create-review');
+        break;
+      case 'Reuniones Profesional':
+        navigate('/profMeets');
+        break;
+      case 'Perfil':
+        navigate('/profile');
+        break;
+      default:
+        break;
     }
   };
 
-  //if (loading) return <CircularProgress />;
-  //if (error) return <Alert severity="error"> Menu Bar Error: {error.message}</Alert>;
+  if (loading) return <CircularProgress />;
+  if (error) return <Alert severity="error">Menu Bar Error: {error.message}</Alert>;
 
   const menuItems = [
     { text: 'Mis Reuniones', icon: <Bookmark /> },
-    { text: 'Servicios Disponibles', icon: <Business /> },
-    { text: 'Agregar Servicios', icon: <AddBusiness /> },
     { text: 'Home', icon: <Home /> },
     { text: 'Perfil', icon: <Person2 /> },
-    { text: 'Reuniones Profesional',icon: <Storage/>},
-    { text: 'Comentarios', icon: <ModeCommentOutlined/>},
-    { text: 'Hacer Comentario', icon : <AddComment/>},
-    { text: 'Logout', icon: <Logout /> }
-    
-
+    { text: 'Comentarios', icon: <ModeCommentOutlined /> },
+    { text: 'Hacer Comentario', icon: <AddComment /> },
   ];
 
-  {/**if (data.user.isProfessional) {
-    menuItems.splice(2, 0, { text: 'Agregar Servicios', icon: <AddBusiness /> });
-  }**/}
+  
+  if ( data.user.data.isProfessional) {
+    menuItems.push(
+      { text: 'Servicios Disponibles', icon: <Business /> },
+      { text: 'Reuniones Profesional', icon: <Storage /> }
+    );
+  }
+
+  // Agregar Logout al final del menú
+  menuItems.push({ text: 'Logout', icon: <Logout /> });
 
   return (
     <div style={{ display: 'flex' }}>
