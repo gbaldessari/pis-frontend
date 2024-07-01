@@ -150,6 +150,32 @@ export const GET_AVAILABLE_TIMES = gql`
   }
 `;
 
+/**Fetches a list of all reviews.
+@return {Object[]} A list of reviews.
+*/
+export const GET_USER_REVIEWS = gql`
+query getUserReviews {
+  getUserReviews {
+    data {
+      id
+      comment
+      rate
+      job {
+        id
+        jobName
+      }
+      user {
+        id
+        username
+        email
+      }
+    }
+    message
+    success
+  }
+}
+`;
+
 // ------------------- MUTATIONS ------------------- //
 
 // ------------------- Users ------------------- //

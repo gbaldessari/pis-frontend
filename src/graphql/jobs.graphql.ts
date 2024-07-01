@@ -253,6 +253,10 @@ export const GET_REVIEWS_BY_JOB = gql`
         idJob {
           id
           jobName
+          idCategory {
+            id
+            categoryName
+          }
         }
         idUser {
           id
@@ -405,32 +409,6 @@ query getProfessionalJobs {
         email
       }
       requestsCount
-    }
-    message
-    success
-  }
-}
-`;
-
-/**Fetches a list of all reviews.
-@return {Object[]} A list of reviews.
-*/
-export const GET_USER_REVIEWS = gql`
-query getUserReviews {
-  getUserReviews {
-    data {
-      id
-      comment
-      rate
-      idJob {
-        id
-        jobName
-      }
-      idUser {
-        id
-        username
-        email
-      }
     }
     message
     success

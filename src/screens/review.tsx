@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from '@apollo/client';
-import { GET_USER_REVIEWS } from '../graphql/jobs.graphql';
+import { GET_USER_REVIEWS } from '../graphql/users.graphql';
 import { CircularProgress, Container, Typography, Alert, Grid, Paper } from '@mui/material';
 
 interface Review {
