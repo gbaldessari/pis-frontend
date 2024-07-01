@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { useMutation } from "@apollo/client";
-import { CREATE_JOB } from "../graphql/jobs.graphql";
+import React, { useState } from "react";
+import { useMutation, useQuery } from "@apollo/client";
+import { CREATE_JOB, GET_CATEGORIES } from "../graphql/jobs.graphql";
 import {
   Container,
   TextField,
@@ -10,6 +10,11 @@ import {
   Grid,
   Snackbar,
 } from "@mui/material";
+
+type Category = {
+  id: number;
+  categoryName: string;
+};
 
 type JobInput = {
   jobName: string;
@@ -28,7 +33,11 @@ const CreateJobForm: React.FC = () => {
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
-  const [createJob, { loading }] = useMutation(CREATE_JOB, {
+  const { loading, error, data } = useQuery<{ categories: Category[] }>(
+    GET_CATEGORIES
+  );
+
+  const [createJobMutation] = useMutation(CREATE_JOB, {
     onCompleted: (data) => {
       if (data.createJob.success) {
         setAlertMessage("Se ha creado el trabajo exitosamente");
@@ -47,7 +56,7 @@ const CreateJobForm: React.FC = () => {
       console.error("Error creando trabajo: ", error);
       setAlertMessage("Error creando trabajo");
       setAlertOpen(true);
-    }
+    },
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,12 +70,12 @@ const CreateJobForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await createJob({
+      await createJobMutation({
         variables: {
           jobName: jobData.jobName,
           description: jobData.description,
           idCategory: jobData.idCategory,
-          price: jobData.price
+          price: jobData.price,
         },
       });
     } catch (error) {
@@ -78,12 +87,23 @@ const CreateJobForm: React.FC = () => {
     setAlertOpen(false);
   };
 
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
+
   return (
     <Container maxWidth="sm">
-      <Grid container direction="column" justifyContent="center" alignItems="center" sx={{ minHeight: "100vh" }}>
+      <Grid
+        container
+        direction="column"
+        justifyContent="center"
+        alignItems="center"
+        sx={{ minHeight: "100vh" }}
+      >
         <Grid item>
           <Paper sx={{ padding: "1.2em", borderRadius: "0.5em" }}>
-            <Typography variant="h4" sx={{ mb: 2 }}>Crear Trabajo</Typography>
+            <Typography variant="h4" sx={{ mb: 2 }}>
+              Crear Trabajo
+            </Typography>
             <form onSubmit={handleSubmit}>
               <TextField
                 name="jobName"
@@ -105,14 +125,23 @@ const CreateJobForm: React.FC = () => {
               />
               <TextField
                 name="idCategory"
-                label="ID Categoria"
-                type="number"
+                label="ID Categoría"
+                select
                 value={jobData.idCategory}
                 onChange={handleChange}
                 fullWidth
                 required
+                SelectProps={{
+                  native: true,
+                }}
                 sx={{ mb: 2 }}
-              />
+              >
+                {data?.categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.categoryName}
+                  </option>
+                ))}
+              </TextField>
               <TextField
                 name="price"
                 label="Precio"
@@ -123,8 +152,13 @@ const CreateJobForm: React.FC = () => {
                 required
                 sx={{ mb: 2 }}
               />
-              <Button type="submit" variant="contained" fullWidth disabled={loading}>
-                {loading ? "Submitting..." : "Crear Trabajo"}
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                disabled={loading}
+              >
+                {loading ? "Enviando..." : "Crear Trabajo"}
               </Button>
             </form>
           </Paper>

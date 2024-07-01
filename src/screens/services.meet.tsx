@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
-import { useQuery, useMutation } from '@apollo/client';
+import { useQuery, useLazyQuery, useMutation } from '@apollo/client';
 import { GET_JOBS } from '../graphql/jobs.graphql';
 import { CREATE_MEET } from '../graphql/meets.graphql';
-
+import { GET_REVIEWS_BY_JOB } from '../graphql/jobs.graphql';
 import {
   Card,
   CardActionArea,
@@ -13,20 +14,41 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  TextField
+  TextField,
+  CircularProgress,
+  List,
+  ListItem,
+  ListItemText
 } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 
+interface Service {
+  id: number;
+  jobName: string;
+  price: number;
+  idProfessional: {
+    username: string;
+  };
+  averageRate: number;
+  description: string;
+}
+
+interface Review {
+  id: number;
+  comment: string;
+  rate: number;
+  idUser: {
+    username: string;
+  };
+}
+
 const StarRating: React.FC<{ stars: number }> = ({ stars }) => {
   return (
     <div>
       {[...Array(stars)].map((_, index) => (
-        <StarIcon
-          key={index}
-          style={{ width: 20, height: 20, color: "gold" }}
-        />
+        <StarIcon key={index} style={{ width: 20, height: 20, color: "gold" }} />
       ))}
       {[...Array(5 - stars)].map((_, index) => (
         <StarBorderIcon key={index} style={{ width: 20, height: 20 }} />
@@ -35,7 +57,7 @@ const StarRating: React.FC<{ stars: number }> = ({ stars }) => {
   );
 };
 
-const ServiceList: React.FC<{ services: any[] }> = ({ services }) => {
+const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
   const [meetDetails, setMeetDetails] = useState({
     idJob: 0,
     meetDate: "",
@@ -43,7 +65,9 @@ const ServiceList: React.FC<{ services: any[] }> = ({ services }) => {
     endTime: ""
   });
 
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [showEditFields, setShowEditFields] = useState(false);
+  const [loadingReviews, setLoadingReviews] = useState(false);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -66,12 +90,25 @@ const ServiceList: React.FC<{ services: any[] }> = ({ services }) => {
     }
   });
 
-  const handleVerClick = (jobId: number) => {
+  const [getReviewsByService] = useLazyQuery(GET_REVIEWS_BY_JOB, {
+    onCompleted: (data) => {
+      setReviews(data.getReviewsByJob.data);
+      setLoadingReviews(false);
+    },
+    onError: (error) => {
+      console.error("Error fetching reviews:", error);
+      setLoadingReviews(false);
+    }
+  });
+
+  const handleVerClick = (serviceId: number) => {
     setShowEditFields(true);
     setMeetDetails({
       ...meetDetails,
-      idJob: jobId
+      idJob: serviceId
     });
+    setLoadingReviews(true);
+    getReviewsByService({ variables: { idJob: serviceId } });
   };
 
   const handleSubmit = () => {
@@ -180,6 +217,19 @@ const ServiceList: React.FC<{ services: any[] }> = ({ services }) => {
             <Button fullWidth onClick={() => handleVerClick(service.id)}>
               Agregar
             </Button>
+          )}
+          {loadingReviews && <CircularProgress />}
+          {!loadingReviews && reviews.length > 0 && (
+            <List>
+              {reviews.map((review) => (
+                <ListItem key={review.id}>
+                  <ListItemText
+                    primary={review.comment}
+                    secondary={`Calificación: ${review.rate} - ${review.idUser.username}`}
+                  />
+                </ListItem>
+              ))}
+            </List>
           )}
         </Card>
       ))}

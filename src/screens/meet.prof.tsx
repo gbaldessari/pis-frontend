@@ -1,12 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { GET_USER_MEETS, FINISH_MEET } from '../graphql/meets.graphql';
-import { GET_TOTAL_SALES_GENERATED,GET_TOTAL_SALES_MONTH } from '../graphql/users.graphql';
+import { GET_TOTAL_SALES_GENERATED, GET_TOTAL_SALES_MONTH } from '../graphql/users.graphql';
 import { REMOVE_JOB } from '../graphql/jobs.graphql';
-import { 
-    List, ListItem, Card, CardContent, Typography, CircularProgress, Alert, Container, Box, Button, Grid 
-} from '@mui/material';
+import {  Card, CardContent, Typography, CircularProgress, Alert, Container, Box, Button, Grid, TextField } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import { gql } from '@apollo/client';
 
 const ProfMeets: React.FC = () => {
     const theme = useTheme();
@@ -14,11 +13,16 @@ const ProfMeets: React.FC = () => {
     const { loading: salesLoading, error: salesError, data: salesData } = useQuery(GET_TOTAL_SALES_GENERATED);
     const { loading: monthSalesLoading, error: monthSalesError, data: monthSalesData } = useQuery(GET_TOTAL_SALES_MONTH);
     const [finishMeet, { loading: mutationLoading }] = useMutation(FINISH_MEET, {
-        onCompleted: () => refetch(), 
+        onCompleted: () => refetch(),
     });
     const [removeJob, { loading: removeLoading, error: removeError }] = useMutation(REMOVE_JOB, {
-        onCompleted: () => refetch(), 
+        onCompleted: () => refetch(),
     });
+    const [updateJob, { loading: updateLoading }] = useMutation(UPDATE_JOB, {
+        onCompleted: () => refetch(),
+    });
+
+    const [editJob, setEditJob] = useState<any>(null);
 
     if (loading || salesLoading || monthSalesLoading) {
         return (
@@ -47,6 +51,32 @@ const ProfMeets: React.FC = () => {
     const handleRemoveJob = (id: number) => {
         console.log('Removing Job ID:', id);
         removeJob({ variables: { id } });
+    };
+
+    const handleEditJob = (job: any) => {
+        setEditJob(job);
+    };
+
+    const handleSaveJob = () => {
+        if (editJob) {
+            const { id, description, price } = editJob;
+            updateJob({
+                variables: {
+                    id,
+                    description,
+                    price
+                }
+            });
+            setEditJob(null);
+        }
+    };
+
+    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = event.target;
+        setEditJob({
+            ...editJob,
+            [name]: value
+        });
     };
 
     const meets = data?.getUserMeets?.data || [];
@@ -102,6 +132,13 @@ const ProfMeets: React.FC = () => {
                                     >
                                         {removeLoading ? <CircularProgress size={24} /> : 'Eliminar Trabajo'}
                                     </Button>
+                                    <Button
+                                        variant="contained"
+                                        sx={{ marginTop: theme.spacing(2) }}
+                                        onClick={() => handleEditJob(meet.idJob)}
+                                    >
+                                        Editar Trabajo
+                                    </Button>
                                     {removeError && <Alert severity="error" sx={{ mt: 2 }}>{removeError.message}</Alert>}
                                 </CardContent>
                             </Card>
@@ -111,8 +148,86 @@ const ProfMeets: React.FC = () => {
             ) : (
                 <Typography variant="subtitle1">No hay reuniones disponibles.</Typography>
             )}
+            {editJob && (
+                <Box sx={{ marginTop: theme.spacing(4) }}>
+                    <Typography variant="h5">Editar Trabajo</Typography>
+                    <TextField
+                        name="jobName"
+                        label="Nombre del Trabajo"
+                        value={editJob.jobName}
+                        onChange={handleInputChange}
+                        fullWidth
+                        sx={{ marginBottom: theme.spacing(2) }}
+                    />
+                    <TextField
+                        name="description"
+                        label="Descripción"
+                        value={editJob.description}
+                        onChange={handleInputChange}
+                        fullWidth
+                        sx={{ marginBottom: theme.spacing(2) }}
+                    />
+                    <TextField
+                        name="idCategory"
+                        label="ID Categoría"
+                        value={editJob.idCategory}
+                        onChange={handleInputChange}
+                        fullWidth
+                        sx={{ marginBottom: theme.spacing(2) }}
+                    />
+                    <TextField
+                        name="requestsCount"
+                        label="Cantidad de Solicitudes"
+                        value={editJob.requestsCount}
+                        onChange={handleInputChange}
+                        fullWidth
+                        sx={{ marginBottom: theme.spacing(2) }}
+                    />
+                    <TextField
+                        name="price"
+                        label="Precio"
+                        value={editJob.price}
+                        onChange={handleInputChange}
+                        fullWidth
+                        sx={{ marginBottom: theme.spacing(2) }}
+                    />
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleSaveJob}
+                        disabled={updateLoading}
+                    >
+                        {updateLoading ? <CircularProgress size={24} /> : 'Guardar Cambios'}
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        onClick={() => setEditJob(null)}
+                        sx={{ marginLeft: theme.spacing(2) }}
+                    >
+                        Cancelar
+                    </Button>
+                </Box>
+            )}
         </Container>
     );
 };
 
-export default ProfMeets
+export default ProfMeets;
+
+export const UPDATE_JOB = gql`
+  mutation updateJob(
+    $id: ID!,
+    $description: String,
+    $price: Int
+  ) {
+    updateJob(id: $id, updateJobInput: {
+      description: $description,
+      price: $price
+    }) {
+      data
+      message
+      success
+    }
+  }
+`;

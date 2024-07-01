@@ -59,7 +59,7 @@ const EditProfile: React.FC = () => {
   return (
     <Box sx={{ ml: 11 }}> 
       <Container>
-        <Typography variant="h4" gutterBottom>Edit Profile</Typography>
+        <Typography variant="h4" gutterBottom>Editar Usuario</Typography>
         <form onSubmit={handleSubmit}>
           <TextField
             label="Username"

@@ -135,13 +135,18 @@ export const GET_FIVE_FAVORITE_JOBS = gql`
 `;
 
 /**
- * Fetches available times for a specific date.
- * @param {String} date - The date to get available times for.
- * @return {String[]} A list of available times.
- */
+ 
+Fetches available times for a specific date.
+@param {String} date - The date to get available times for.
+@return {String[]} A list of available times.
+*/
 export const GET_AVAILABLE_TIMES = gql`
   query getAvailableTimes($date: String!) {
-    getAvailableTimes(date: $date)
+    getAvailableTimes(date: $date){
+      data
+      message
+      success
+    }
   }
 `;
 

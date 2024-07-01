@@ -10,7 +10,7 @@ const UserMeets: React.FC = () => {
     const theme = useTheme();
     const { loading, error, data, refetch } = useQuery(GET_USER_MEETS);
     const [finishMeet, { loading: mutationLoading }] = useMutation(FINISH_MEET, {
-        onCompleted: () => refetch(), // Refetch the GET_USER_MEETS query to update the list
+        onCompleted: () => refetch(), 
     });
 
     if (loading) {
