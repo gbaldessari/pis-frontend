@@ -1,7 +1,22 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
-import { REMOVE_JOB, UPDATE_JOB, GET_PROFESSIONAL_JOBS } from '../graphql/jobs.graphql';
-import { CircularProgress, Container, Typography, Alert, Box, Button, Grid, TextField, Card, CardContent } from '@mui/material';
+import {
+  REMOVE_JOB,
+  UPDATE_JOB,
+  GET_PROFESSIONAL_JOBS
+} from '../graphql/jobs.graphql';
+import {
+  CircularProgress,
+  Container,
+  Typography,
+  Alert,
+  Box,
+  Button,
+  Grid,
+  TextField,
+  Card,
+  CardContent
+} from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
 const ProfMeets: React.FC = () => {
@@ -10,14 +25,22 @@ const ProfMeets: React.FC = () => {
   const [removeJob, { loading: removeLoading, error: removeError }] = useMutation(REMOVE_JOB, {
     onCompleted: () => refetch(),
   });
-  const [updateJob, { loading: updateLoading }] = useMutation(UPDATE_JOB, {
+  const [updateJob, { loading: updateLoading, error: updateError }] = useMutation(UPDATE_JOB, {
     onCompleted: () => {
       refetch();
       setEditJob(null);
+      setAlertMessage("¡Trabajo actualizado correctamente!");
+      setAlertSeverity("success");
+    },
+    onError: (error) => {
+      setAlertMessage(`Error al actualizar el trabajo: ${error.message}`);
+      setAlertSeverity("error");
     },
   });
 
   const [editJob, setEditJob] = useState<any>(null);
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [alertSeverity, setAlertSeverity] = useState<"success" | "error" | "info" | "warning" | undefined>(undefined);
 
   if (loading) {
     return (
@@ -53,11 +76,12 @@ const ProfMeets: React.FC = () => {
       const { id, description, price } = editJob;
       updateJob({
         variables: {
+          id, // Include the job ID to identify which job to update
           jobName: editJob.jobName,
           description,
           idCategory: editJob.idCategory.id,
           requestsCount: editJob.requestsCount,
-          price
+          price: parseInt(price, 10) // Convert price to integer
         }
       });
     }
@@ -67,13 +91,18 @@ const ProfMeets: React.FC = () => {
     const { name, value } = event.target;
     setEditJob({
       ...editJob,
-      [name]: value
+      [name]: name === 'price' ? parseInt(value, 10) || 0 : value // Ensure price is always an integer
     });
   };
 
   return (
     <Container sx={{ padding: theme.spacing(2) }}>
       <Typography variant="h4" gutterBottom sx={{ marginBottom: theme.spacing(2) }}>Trabajos del Profesional</Typography>
+      {alertMessage && (
+        <Alert severity={alertSeverity} sx={{ marginTop: theme.spacing(2) }}>
+          {alertMessage}
+        </Alert>
+      )}
       {data.getProfessionalJobs.message && (
         <Alert severity={data.getProfessionalJobs.success ? "success" : "warning"} sx={{ marginTop: theme.spacing(2) }}>
           {data.getProfessionalJobs.message}
@@ -137,6 +166,7 @@ const ProfMeets: React.FC = () => {
           <TextField
             name="price"
             label="Precio"
+            type="number" // Ensure the input type is number
             value={editJob.price}
             onChange={handleInputChange}
             fullWidth
@@ -158,6 +188,7 @@ const ProfMeets: React.FC = () => {
           >
             Cancelar
           </Button>
+          {updateError && <Alert severity="error" sx={{ mt: 2 }}>{updateError.message}</Alert>}
         </Box>
       )}
     </Container>

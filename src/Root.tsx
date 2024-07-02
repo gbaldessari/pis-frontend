@@ -15,6 +15,7 @@ import ViewProfile from "./screens/user.profile";
 import CreateReview from "./screens/createReview";
 import ViewReviews from "./screens/review";
 import ProfMeets from "./screens/meet.prof";
+import ReviewsByJob from "./screens/test";
 
 
 export const AppRoutes: React.FC<{}> = () => {

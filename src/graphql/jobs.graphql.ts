@@ -239,10 +239,11 @@ export const GET_REVIEWS = gql`
 `;
 
 /**
- * Fetches reviews for a specific job.
- * @param {Int} idJob - The ID of the job to fetch reviews for.
- * @return {Object[]} A list of reviews for the specified job, a message, and a success flag.
- */
+ 
+Fetches reviews for a specific job.
+@param {Int} idJob - The ID of the job to fetch reviews for.
+@return {Object[]} A list of reviews for the specified job, a message, and a success flag.
+*/
 export const GET_REVIEWS_BY_JOB = gql`
   query getReviewsByJob($idJob: Int!) {
     getReviewsByJob(idJob: $idJob) {
@@ -250,7 +251,7 @@ export const GET_REVIEWS_BY_JOB = gql`
         id
         comment
         rate
-        idJob {
+        job {
           id
           jobName
           idCategory {
@@ -258,7 +259,7 @@ export const GET_REVIEWS_BY_JOB = gql`
             categoryName
           }
         }
-        idUser {
+        user {
           id
           username
           email

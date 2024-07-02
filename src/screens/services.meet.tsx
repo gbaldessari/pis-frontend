@@ -1,9 +1,26 @@
 import React, { useState } from 'react';
 import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
-import {Container, Card, CardActionArea, CardContent, Typography, CardActions, Button, Accordion, AccordionSummary, AccordionDetails, TextField, CircularProgress, List, ListItem, ListItemText, Alert } from "@mui/material";
-import StarIcon from "@mui/icons-material/Star";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import {
+  Container,
+  Card,
+  CardActionArea,
+  CardContent,
+  Typography,
+  CardActions,
+  Button,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  TextField,
+  CircularProgress,
+  List,
+  ListItem,
+  ListItemText,
+  Alert,
+} from '@mui/material';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { CREATE_MEET } from '../graphql/meets.graphql';
 import { GET_REVIEWS_BY_JOB, GET_JOBS } from '../graphql/jobs.graphql';
 
@@ -22,8 +39,10 @@ interface Review {
   id: number;
   comment: string;
   rate: number;
-  idUser: {
+  user: {
+    id: number;
     username: string;
+    email: string;
   };
 }
 
@@ -31,7 +50,7 @@ const StarRating: React.FC<{ stars: number }> = ({ stars }) => {
   return (
     <div>
       {[...Array(stars)].map((_, index) => (
-        <StarIcon key={index} style={{ width: 20, height: 20, color: "gold" }} />
+        <StarIcon key={index} style={{ width: 20, height: 20, color: 'gold' }} />
       ))}
       {[...Array(5 - stars)].map((_, index) => (
         <StarBorderIcon key={index} style={{ width: 20, height: 20 }} />
@@ -40,75 +59,87 @@ const StarRating: React.FC<{ stars: number }> = ({ stars }) => {
   );
 };
 
+const ReviewsByJob: React.FC<{ jobId: number }> = ({ jobId }) => {
+  const [error, setError] = useState<string | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loadingReviews, setLoadingReviews] = useState(false);
+
+  const [getReviewsByJob, { loading: queryLoading, data }] = useLazyQuery(GET_REVIEWS_BY_JOB, {
+    onCompleted: (data) => {
+      setReviews(data.getReviewsByJob.data);
+      setLoadingReviews(false);
+    },
+    onError: (error) => {
+      setError(`Error fetching reviews: ${error.message}`);
+      setLoadingReviews(false);
+    }
+  });
+
+  const handleFetchReviews = () => {
+    setLoadingReviews(true);
+    getReviewsByJob({ variables: { idJob: jobId } });
+  };
+
+  return (
+    <Accordion>
+      <AccordionSummary expandIcon={<ArrowDownwardIcon />} aria-controls="panel1-content" id="panel1-header" onClick={handleFetchReviews}>
+        <Typography variant="subtitle1">Ver reseñas</Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+        {queryLoading && <CircularProgress />}
+        {error && <Alert severity="error">{error}</Alert>}
+        {data && data.getReviewsByJob.data.length === 0 && <Typography>No hay reseñas disponibles.</Typography>}
+        {data && data.getReviewsByJob.data.length > 0 && (
+          <List>
+            {data.getReviewsByJob.data.map((review: Review) => (
+              <ListItem key={review.id}>
+                <ListItemText
+                  primary={review.comment}
+                  secondary={`Calificación: ${review.rate} - Usuario: ${review.user.username}`}
+                />
+              </ListItem>
+            ))}
+          </List>
+        )}
+      </AccordionDetails>
+    </Accordion>
+  );
+};
+
 const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
   const [meetDetails, setMeetDetails] = useState({
     idJob: 0,
-    meetDate: "",
-    startTime: "",
-    endTime: ""
+    meetDate: '',
+    startTime: '',
+    endTime: '',
   });
 
-  const [reviews, setReviews] = useState<Review[]>([]);
   const [showEditFields, setShowEditFields] = useState(false);
-  const [loadingReviews, setLoadingReviews] = useState(false);
-  const [alertMessage, setAlertMessage] = useState<string | null>(null); // Estado para el mensaje de alerta
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setMeetDetails({
       ...meetDetails,
-      [name]: value
+      [name]: value,
     });
   };
 
   const [createMeet] = useMutation(CREATE_MEET, {
     onCompleted: (data) => {
       if (data.createMeet.success) {
-        setAlertMessage("¡Encuentro creado con éxito!");
-        console.log("Encuentro creado con éxito:", data.createMeet.data);
+        setAlertMessage('¡Encuentro creado con éxito!');
+        console.log('Encuentro creado con éxito:', data.createMeet.data);
       } else {
         setAlertMessage(`Error al crear el encuentro: ${data.createMeet.message}`);
-        console.error("Error al crear el encuentro:", data.createMeet.message);
+        console.error('Error al crear el encuentro:', data.createMeet.message);
       }
     },
     onError: (error) => {
       setAlertMessage(`Error en la mutación CREATE_MEET: ${error.message}`);
-      console.error("Error en la mutación CREATE_MEET:", error);
-    }
-  });
-
-  const [getReviewsByService, { loading: reviewsLoading }] = useLazyQuery(GET_REVIEWS_BY_JOB, {
-    onCompleted: (data) => {
-      console.log(data);
-      setReviews(data.getReviewsByJob.data);
-      setLoadingReviews(false);
+      console.error('Error en la mutación CREATE_MEET:', error);
     },
-    onError: (error) => {
-      console.error("Error fetching reviews:", error);
-      setLoadingReviews(false);
-    }
   });
-
-  const handleVerClick = (serviceId: number) => {
-    setShowEditFields(true);
-    setMeetDetails({
-      ...meetDetails,
-      idJob: serviceId
-    });
-    setLoadingReviews(true);
-    getReviewsByService({ variables: { idJob: serviceId } });
-  };
-
-  const handleSubmit = () => {
-    createMeet({
-      variables: meetDetails
-    });
-    setShowEditFields(false);
-  };
-
-  const handleCancel = () => {
-    setShowEditFields(false);
-  };
 
   return (
     <div>
@@ -121,6 +152,9 @@ const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
               </Typography>
               <Typography variant="body1" color="textSecondary" gutterBottom>
                 Precio: {service.price}
+              </Typography>
+              <Typography variant="body1" color="textSecondary" gutterBottom>
+                Descripción: {service.description}
               </Typography>
               <Typography variant="body1" color="textSecondary" gutterBottom>
                 Profesional: {service.idProfessional.username}
@@ -175,52 +209,24 @@ const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
             </CardContent>
           </CardActionArea>
           <CardActions>
-            <Accordion>
-              <AccordionSummary
-                expandIcon={<ArrowDownwardIcon />}
-                aria-controls="panel1-content"
-                id="panel1-header"
-                style={{ display: "flex", justifyContent: "space-between" }}
-              >
-                <Typography>Descripción</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Typography color="textSecondary" gutterBottom>
-                  {service.description}
-                </Typography>
-              </AccordionDetails>
-            </Accordion>
+            {showEditFields ? (
+              <>
+                <Button fullWidth onClick={() => createMeet({ variables: meetDetails })}>
+                  Crear Encuentro
+                </Button>
+                <Button fullWidth onClick={() => setShowEditFields(false)}>
+                  Cancelar
+                </Button>
+              </>
+            ) : (
+              <Button fullWidth onClick={() => setShowEditFields(true)}>
+                Agregar Encuentro
+              </Button>
+            )}
+            <ReviewsByJob jobId={service.id} />
           </CardActions>
-          {showEditFields && (
-            <>
-              <Button fullWidth onClick={handleSubmit}>
-                Crear Encuentro
-              </Button>
-              <Button fullWidth onClick={handleCancel}>
-                Cancelar
-              </Button>
-            </>
-          )}
-          {!showEditFields && (
-            <Button fullWidth onClick={() => handleVerClick(service.id)}>
-              Agregar
-            </Button>
-          )}
-          {loadingReviews && <CircularProgress />}
-          {!loadingReviews && reviews.length > 0 && (
-            <List>
-              {reviews.map((review) => (
-                <ListItem key={review.id}>
-                  <ListItemText
-                    primary={review.comment}
-                    secondary={`Calificación: ${review.rate} - ${review.idUser.username}`}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          )}
           {alertMessage && (
-            <Alert severity={alertMessage.includes("Error") ? "error" : "success"} sx={{ marginTop: 2 }}>
+            <Alert severity={alertMessage.includes('Error') ? 'error' : 'success'} sx={{ marginTop: 2 }}>
               {alertMessage}
             </Alert>
           )}
@@ -238,7 +244,9 @@ export const ServicesExample: React.FC = () => {
 
   return (
     <Container maxWidth="md">
-      <Typography variant="h4" gutterBottom>Lista de Servicios</Typography>
+      <Typography variant="h4" gutterBottom>
+        Lista de Servicios
+      </Typography>
       <ServiceList services={data.jobs} />
     </Container>
   );

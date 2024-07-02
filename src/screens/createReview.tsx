@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
-import { CREATE_REVIEW } from '../graphql/jobs.graphql';
-import { GET_JOBS } from '../graphql/jobs.graphql';
+import { CREATE_REVIEW, GET_JOBS } from '../graphql/jobs.graphql';
 import { TextField, Button, Container, Typography, Alert, CircularProgress, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
 
 const CreateReview: React.FC = () => {
@@ -12,9 +11,15 @@ const CreateReview: React.FC = () => {
 
   const { loading: jobsLoading, error: jobsError, data: jobsData } = useQuery(GET_JOBS);
 
+  const handleRateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(event.target.value);
+    if (value >= 0 && value <= 5) {
+      setRate(value);
+    }
+  };
+
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    console.log('Job ID:', idJob);
     if (comment && rate !== undefined && idJob !== undefined) {
       createReview({ variables: { comment, rate, idJob } });
     }
@@ -41,12 +46,13 @@ const CreateReview: React.FC = () => {
           margin="normal"
         />
         <TextField
-          label="Calificación"
+          label="Calificación (0-5)"
           type="number"
           value={rate}
-          onChange={(e) => setRate(parseInt(e.target.value))}
+          onChange={handleRateChange}
           fullWidth
           margin="normal"
+          InputProps={{ inputProps: { min: 0, max: 5 } }}
         />
         
         {jobsLoading && <CircularProgress />}

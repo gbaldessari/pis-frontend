@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useMutation, useQuery } from "@apollo/client";
-import { CREATE_JOB, GET_CATEGORIES } from "../graphql/jobs.graphql";
+import { CREATE_JOB, GET_CATEGORIES, CREATE_CATEGORY } from "../graphql/jobs.graphql";
 import {
   Container,
   TextField,
@@ -9,6 +9,7 @@ import {
   Paper,
   Grid,
   Snackbar,
+  Box,
 } from "@mui/material";
 
 type Category = {
@@ -30,10 +31,12 @@ const CreateJobForm: React.FC = () => {
     idCategory: 0,
     price: 0,
   });
+  const [newCategoryName, setNewCategoryName] = useState("");
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [showCreateJob, setShowCreateJob] = useState(true);
 
-  const { loading, error, data } = useQuery<{ categories: Category[] }>(
+  const { loading, error, data, refetch } = useQuery<{ categories: Category[] }>(
     GET_CATEGORIES
   );
 
@@ -59,6 +62,24 @@ const CreateJobForm: React.FC = () => {
     },
   });
 
+  const [createCategoryMutation] = useMutation(CREATE_CATEGORY, {
+    onCompleted: (data) => {
+      if (data.createCategory.success) {
+        setAlertMessage("Categoría creada exitosamente");
+        refetch(); // Refrescar la lista de categorías
+      } else {
+        setAlertMessage("Error al crear la categoría");
+      }
+      setAlertOpen(true);
+      setNewCategoryName("");
+    },
+    onError: (error) => {
+      console.error("Error creando categoría: ", error);
+      setAlertMessage("Error creando categoría");
+      setAlertOpen(true);
+    },
+  });
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setJobData({
@@ -67,7 +88,7 @@ const CreateJobForm: React.FC = () => {
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmitJob = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await createJobMutation({
@@ -80,6 +101,19 @@ const CreateJobForm: React.FC = () => {
       });
     } catch (error) {
       console.error("Error creating job: ", error);
+    }
+  };
+
+  const handleCreateCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await createCategoryMutation({
+        variables: {
+          name: newCategoryName,
+        },
+      });
+    } catch (error) {
+      console.error("Error creating category: ", error);
     }
   };
 
@@ -101,66 +135,108 @@ const CreateJobForm: React.FC = () => {
       >
         <Grid item>
           <Paper sx={{ padding: "1.2em", borderRadius: "0.5em" }}>
-            <Typography variant="h4" sx={{ mb: 2 }}>
-              Crear Trabajo
-            </Typography>
-            <form onSubmit={handleSubmit}>
-              <TextField
-                name="jobName"
-                label="Nombre del Servicio"
-                value={jobData.jobName}
-                onChange={handleChange}
-                fullWidth
-                required
-                sx={{ mb: 2 }}
-              />
-              <TextField
-                name="description"
-                label="Descripción"
-                value={jobData.description}
-                onChange={handleChange}
-                fullWidth
-                required
-                sx={{ mb: 2 }}
-              />
-              <TextField
-                name="idCategory"
-                label="ID Categoría"
-                select
-                value={jobData.idCategory}
-                onChange={handleChange}
-                fullWidth
-                required
-                SelectProps={{
-                  native: true,
-                }}
-                sx={{ mb: 2 }}
-              >
-                {data?.categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.categoryName}
-                  </option>
-                ))}
-              </TextField>
-              <TextField
-                name="price"
-                label="Precio"
-                type="number"
-                value={jobData.price}
-                onChange={handleChange}
-                fullWidth
-                required
-                sx={{ mb: 2 }}
-              />
-              <Button
-                type="submit"
-                variant="contained"
-                fullWidth
-                disabled={loading}
-              >
-                {loading ? "Enviando..." : "Crear Trabajo"}
-              </Button>
-            </form>
+            {showCreateJob ? (
+              <>
+                <Typography variant="h4" sx={{ mb: 2 }}>
+                  Crear Trabajo
+                </Typography>
+                <form onSubmit={handleSubmitJob}>
+                  <TextField
+                    name="jobName"
+                    label="Nombre del Servicio"
+                    value={jobData.jobName}
+                    onChange={handleChange}
+                    fullWidth
+                    required
+                    sx={{ mb: 2 }}
+                  />
+                  <TextField
+                    name="description"
+                    label="Descripción"
+                    value={jobData.description}
+                    onChange={handleChange}
+                    fullWidth
+                    required
+                    sx={{ mb: 2 }}
+                  />
+                  <TextField
+                    name="idCategory"
+                    label="ID Categoría"
+                    select
+                    value={jobData.idCategory}
+                    onChange={handleChange}
+                    fullWidth
+                    required
+                    SelectProps={{
+                      native: true,
+                    }}
+                    sx={{ mb: 2 }}
+                  >
+                    {data?.categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.categoryName}
+                      </option>
+                    ))}
+                  </TextField>
+                  <TextField
+                    name="price"
+                    label="Precio"
+                    type="number"
+                    value={jobData.price}
+                    onChange={handleChange}
+                    fullWidth
+                    required
+                    sx={{ mb: 2 }}
+                  />
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    fullWidth
+                    disabled={loading}
+                  >
+                    {loading ? "Enviando..." : "Crear Trabajo"}
+                  </Button>
+                </form>
+                <Button
+                  variant="text"
+                  onClick={() => setShowCreateJob(false)}
+                  sx={{ mt: 2 }}
+                >
+                  Crear Categoría
+                </Button>
+              </>
+            ) : (
+              <>
+                <Typography variant="h4" sx={{ mb: 2 }}>
+                  Crear Categoría
+                </Typography>
+                <form onSubmit={handleCreateCategory}>
+                  <TextField
+                    name="categoryName"
+                    label="Nombre de la Categoría"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    fullWidth
+                    required
+                    sx={{ mb: 2 }}
+                  />
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    fullWidth
+                  >
+                    Crear Categoría
+                  </Button>
+                </form>
+                <Button
+                  variant="text"
+                  onClick={() => setShowCreateJob(true)}
+                  sx={{ mt: 2 }}
+                >
+                  Crear Trabajo
+                </Button>
+              </>
+            )}
           </Paper>
         </Grid>
       </Grid>

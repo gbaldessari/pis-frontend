@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@apollo/client';
 import { Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar, CssBaseline, CircularProgress, Alert } from '@mui/material';
-import { Business, AddBusiness, Logout, Bookmark, Person2, Home, ModeCommentOutlined, AddComment, Storage } from '@mui/icons-material';
+import { Business, AddBusiness, Logout, Bookmark, Person2, Home, ModeCommentOutlined, AddComment, Storage, Group } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { GET_USER } from '../graphql/users.graphql';
@@ -38,12 +38,12 @@ const MenuBar: React.FC = () => {
       case 'Hacer Comentario':
         navigate('/create-review');
         break;
-      case 'Reuniones Profesional':
+      case 'Mis Servicios':
         navigate('/profMeets');
         break;
       case 'Perfil':
         navigate('/profile');
-        break;
+        break;  
       default:
         break;
     }
@@ -59,12 +59,14 @@ const MenuBar: React.FC = () => {
     { text: 'Perfil', icon: <Person2 /> },
     { text: 'Comentarios', icon: <ModeCommentOutlined /> },
     { text: 'Hacer Comentario', icon: <AddComment /> },
+    
   ];
 
   
   if ( data.user.data.isProfessional) {
     menuItems.push(
-      { text: 'Reuniones Profesional', icon: <Storage /> }
+      { text: 'Mis Servicios', icon: <Storage /> },
+      { text: 'Agregar Servicios' , icon: <AddBusiness/>}
     );
   }
 
