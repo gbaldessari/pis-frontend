@@ -9,7 +9,6 @@ import {
   Paper,
   Grid,
   Snackbar,
-  Box,
 } from "@mui/material";
 
 type Category = {
@@ -36,7 +35,7 @@ const CreateJobForm: React.FC = () => {
   const [alertMessage, setAlertMessage] = useState("");
   const [showCreateJob, setShowCreateJob] = useState(true);
 
-  const { loading, error, data, refetch } = useQuery<{ categories: Category[] }>(
+  const { loading, error, data: categoriesData, refetch } = useQuery<{ categories: Category[] }>(
     GET_CATEGORIES
   );
 
@@ -66,7 +65,7 @@ const CreateJobForm: React.FC = () => {
     onCompleted: (data) => {
       if (data.createCategory.success) {
         setAlertMessage("Categoría creada exitosamente");
-        refetch(); // Refrescar la lista de categorías
+        refetch(); 
       } else {
         setAlertMessage("Error al crear la categoría");
       }
@@ -96,7 +95,7 @@ const CreateJobForm: React.FC = () => {
           jobName: jobData.jobName,
           description: jobData.description,
           idCategory: jobData.idCategory,
-          price: jobData.price,
+          price: parseFloat(jobData.price.toString()), // Convertir a float si es necesario
         },
       });
     } catch (error) {
@@ -122,7 +121,7 @@ const CreateJobForm: React.FC = () => {
   };
 
   if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error :(</p>;
+  if (error) return <p>Error: {error.message}</p>;
 
   return (
     <Container maxWidth="sm">
@@ -172,7 +171,7 @@ const CreateJobForm: React.FC = () => {
                     }}
                     sx={{ mb: 2 }}
                   >
-                    {data?.categories.map((category) => (
+                    {categoriesData?.categories.map((category) => (
                       <option key={category.id} value={category.id}>
                         {category.categoryName}
                       </option>

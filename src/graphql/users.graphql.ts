@@ -5,6 +5,24 @@ import { gql } from '@apollo/client';
 // ------------------- Users ------------------- //
 
 /**
+ 
+Fetches the total jobs requested.
+@return {Object} The total jobs requested data, a message, and a success flag.
+*/
+export const GET_USER_CHATS = gql`
+  query getUserChats {
+    getUserChats {
+      data {
+        id
+        username
+      }
+      message
+      success
+    }
+  }
+`;
+
+/**
  * Fetches a list of all users.
  * @return {Object[]} A list of users.
  */

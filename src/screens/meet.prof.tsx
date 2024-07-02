@@ -76,12 +76,12 @@ const ProfMeets: React.FC = () => {
       const { id, description, price } = editJob;
       updateJob({
         variables: {
-          id, // Include the job ID to identify which job to update
+          id, 
           jobName: editJob.jobName,
           description,
           idCategory: editJob.idCategory.id,
           requestsCount: editJob.requestsCount,
-          price: parseInt(price, 10) // Convert price to integer
+          price: parseInt(price, 10) 
         }
       });
     }
@@ -91,7 +91,7 @@ const ProfMeets: React.FC = () => {
     const { name, value } = event.target;
     setEditJob({
       ...editJob,
-      [name]: name === 'price' ? parseInt(value, 10) || 0 : value // Ensure price is always an integer
+      [name]: name === 'price' ? parseInt(value, 10) || 0 : value 
     });
   };
 
@@ -109,20 +109,19 @@ const ProfMeets: React.FC = () => {
         </Alert>
       )}
       {data.getProfessionalJobs.data.length > 0 ? (
-        <Grid container spacing={3}>
+        <Box sx={{ width: '100%' }}>
           {data.getProfessionalJobs.data.map((job: any) => (
-            <Grid item xs={12} sm={6} md={4} key={job.id}>
-              <Card sx={{ width: '100%', marginBottom: theme.spacing(2) }}>
-                <CardContent>
-                  <Typography variant="h6">{job.jobName}</Typography>
-                  <Typography>Descripción: {job.description}</Typography>
-                  <Typography>Precio: {job.price}</Typography>
-                  <Typography>Categoría: {job.idCategory.categoryName}</Typography>
-                  <Typography>Trabajador: {job.idProfessional.username} ({job.idProfessional.email})</Typography>
+            <Card key={job.id} sx={{ marginBottom: theme.spacing(2) }}>
+              <CardContent>
+                <Typography variant="h6">{job.jobName}</Typography>
+                <Typography>Descripción: {job.description}</Typography>
+                <Typography>Precio: {job.price}</Typography>
+                <Typography>Categoría: {job.idCategory.categoryName}</Typography>
+                <Typography>Trabajador: {job.idProfessional.username} ({job.idProfessional.email})</Typography>
+                <Box sx={{ marginTop: theme.spacing(2) }}>
                   <Button
                     variant="contained"
                     color="secondary"
-                    sx={{ marginTop: theme.spacing(2) }}
                     onClick={() => handleRemoveJob(job.id)}
                     disabled={removeLoading}
                   >
@@ -130,17 +129,17 @@ const ProfMeets: React.FC = () => {
                   </Button>
                   <Button
                     variant="contained"
-                    sx={{ marginTop: theme.spacing(2) }}
+                    sx={{ marginLeft: theme.spacing(2) }}
                     onClick={() => handleEditJob(job)}
                   >
                     Editar Trabajo
                   </Button>
-                  {removeError && <Alert severity="error" sx={{ mt: 2 }}>{removeError.message}</Alert>}
-                </CardContent>
-              </Card>
-            </Grid>
+                </Box>
+                {removeError && <Alert severity="error" sx={{ mt: 2 }}>{removeError.message}</Alert>}
+              </CardContent>
+            </Card>
           ))}
-        </Grid>
+        </Box>
       ) : (
         <Typography variant="subtitle1">No hay trabajos disponibles.</Typography>
       )}

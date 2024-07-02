@@ -24,6 +24,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { CREATE_MEET } from '../graphql/meets.graphql';
 import { GET_REVIEWS_BY_JOB, GET_JOBS } from '../graphql/jobs.graphql';
 import { GET_AVAILABLE_TIMES } from '../graphql/users.graphql';
+
 interface Service {
   id: number;
   jobName: string;
@@ -112,18 +113,29 @@ const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
     idJob: 0,
     meetDate: '',
     selectedTime: '',
-    endTime: '',
   });
   const handleCreateMeet = () => {
+    const startTimeParts = meetDetails.selectedTime.split(':');
+    const startHour = parseInt(startTimeParts[0]);
+    const startMinute = parseInt(startTimeParts[1]);
+    const startSecond = parseInt(startTimeParts[2] || '00'); // Assume seconds as '00' if not provided
+
+    const endMinute = startMinute + 45;
+    const endHour = startHour + Math.floor(endMinute / 60);
+    const formattedEndMinute = endMinute % 60;
+
+    const formattedEndTime = `${endHour.toString().padStart(2, '0')}:${formattedEndMinute.toString().padStart(2, '0')}:${startSecond.toString().padStart(2, '0')}`;
+
     createMeet({
       variables: {
         idJob: meetDetails.idJob,
         meetDate: meetDetails.meetDate,
         startTime: meetDetails.selectedTime,
-        endTime: meetDetails.endTime,
+        endTime: formattedEndTime,
       },
     });
   };
+
   const [showEditFields, setShowEditFields] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
@@ -234,18 +246,6 @@ const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
                       ))}
                     </div>
                   )}
-                  <TextField
-                    type="time"
-                    name="endTime"
-                    label="Hora de fin"
-                    value={meetDetails.endTime}
-                    onChange={handleInputChange}
-                    fullWidth
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    style={{ marginBottom: 10 }}
-                  />
                 </>
               )}
               <StarRating stars={service.averageRate} />
@@ -254,7 +254,7 @@ const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
           <CardActions>
             {showEditFields && meetDetails.idJob === service.id ? (
               <>
-                {meetDetails.selectedTime && meetDetails.endTime && (
+                {meetDetails.selectedTime && (
                   <Button fullWidth onClick={handleCreateMeet}>
                     Crear Encuentro
                   </Button>

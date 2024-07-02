@@ -410,6 +410,7 @@ query getProfessionalJobs {
         email
       }
       requestsCount
+      price
     }
     message
     success

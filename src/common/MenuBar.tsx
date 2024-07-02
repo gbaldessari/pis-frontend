@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@apollo/client';
 import { Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar, CssBaseline, CircularProgress, Alert } from '@mui/material';
-import { Business, AddBusiness, Logout, Bookmark, Person2, Home, ModeCommentOutlined, AddComment, Storage, Group } from '@mui/icons-material';
+import { Business, AddBusiness, Logout, Bookmark, Person2, Home, ModeCommentOutlined, AddComment, Storage, MilitaryTech } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { GET_USER } from '../graphql/users.graphql';
@@ -10,8 +10,7 @@ const drawerWidth = 240;
 
 const MenuBar: React.FC = () => {
   const navigate = useNavigate();
-  const { loading, error, data } = useQuery(GET_USER);
-
+  const { loading, error, data, refetch } = useQuery(GET_USER);
 
   const handleListItemClick = (text: string) => {
     switch (text) {
@@ -43,13 +42,19 @@ const MenuBar: React.FC = () => {
         break;
       case 'Perfil':
         navigate('/profile');
-        break;   
+        break;
+      case 'Top5':
+        navigate('/favorite_job');
+        break;
       default:
         break;
     }
   };
 
+  
   if (loading) return <CircularProgress />;
+  
+
   if (error) return <Alert severity="error">Menu Bar Error: {error.message}</Alert>;
 
   const menuItems = [
@@ -61,15 +66,15 @@ const MenuBar: React.FC = () => {
     { text: 'Hacer Comentario', icon: <AddComment /> },
   ];
 
-  
-  if ( data.user.data.isProfessional) {
+  if (data.user.data.isProfessional) {
     menuItems.push(
       { text: 'Mis Servicios', icon: <Storage /> },
-      { text: 'Agregar Servicios' , icon: <AddBusiness/>}
+      { text: 'Agregar Servicios', icon: <AddBusiness /> },
+      { text: 'Top5', icon: <MilitaryTech /> }
     );
   }
 
-  // Agregar Logout al final del menú
+ 
   menuItems.push({ text: 'Logout', icon: <Logout /> });
 
   return (

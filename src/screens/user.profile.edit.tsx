@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 const EditProfile: React.FC = () => {
   const navigate = useNavigate();
-  const { loading, error, data } = useQuery(GET_USER);
+  const { loading, error, data, refetch } = useQuery(GET_USER); 
   const [editUser] = useMutation(EDIT_USER);
 
   const [formData, setFormData] = useState({
@@ -44,7 +44,8 @@ const EditProfile: React.FC = () => {
       const { data } = await editUser({ variables: { ...formData, phone: parseInt(formData.phone) } });
       if (data.editUser.success) {
         alert('Se han guardado los cambios');
-        navigate('/profile');
+        refetch(); 
+        navigate('/profile'); 
       } else {
         alert('Error al hacer los cambios');
       }

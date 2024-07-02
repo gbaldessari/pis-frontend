@@ -15,6 +15,7 @@ import ViewProfile from "./screens/user.profile";
 import CreateReview from "./screens/createReview";
 import ViewReviews from "./screens/review";
 import ProfMeets from "./screens/meet.prof";
+import FiveFavoriteJobs from "./screens/bestFiveJobs";
 
 export const AppRoutes: React.FC<{}> = () => {
   return (
@@ -31,6 +32,7 @@ export const AppRoutes: React.FC<{}> = () => {
       <Route path="/review" element={<ProtectedRoute><ViewReviews/></ProtectedRoute>} />
       <Route path="/create-review" element={<ProtectedRoute><CreateReview/></ProtectedRoute>} />
       <Route path="/profMeets" element={<ProtectedRoute><ProfMeets/></ProtectedRoute>} />
+      <Route path="/favorite_job" element={<ProtectedRoute><FiveFavoriteJobs/></ProtectedRoute>} />
       </Route>
       {/**RUTAS NO PROTEGIDAS */}
       <Route path="/login" element={<LoginPage/>} />

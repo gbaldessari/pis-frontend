@@ -9,7 +9,6 @@ import { useTheme } from '@mui/material/styles';
 const UserMeets: React.FC = () => {
     const theme = useTheme();
     const { loading, error, data, refetch } = useQuery(GET_USER_MEETS);
-    console.log(data);
     const [finishMeet, { loading: mutationLoading }] = useMutation(FINISH_MEET, {
         onCompleted: () => refetch(), 
     });
@@ -40,7 +39,7 @@ const UserMeets: React.FC = () => {
 
     const meets = data?.getUserMeets?.data || [];
     const message = data?.getUserMeets?.message || '';
-    console.log("MEETS:", meets);
+
     return (
         <Container sx={{ padding: theme.spacing(2) }}>
             <Typography variant="h4" gutterBottom sx={{ marginBottom: theme.spacing(2) }}>User Meets</Typography>
@@ -50,10 +49,10 @@ const UserMeets: React.FC = () => {
                 </Alert>
             )}
             {meets.length > 0 ? (
-                <Grid container spacing={3}>
+                <List sx={{ width: '100%', marginBottom: theme.spacing(2) }}>
                     {meets.map((meet: any) => (
-                        <Grid item xs={12} sm={6} md={4} key={meet.id}>
-                            <Card sx={{ width: '100%', marginBottom: theme.spacing(2) }}>
+                        <ListItem key={meet.id}>
+                            <Card variant="outlined">
                                 <CardContent>
                                     <Typography variant="h6"> {meet.idJob.jobName}</Typography>
                                     <Typography>Descripción: {meet.idJob.description}</Typography>
@@ -77,9 +76,9 @@ const UserMeets: React.FC = () => {
                                     )}
                                 </CardContent>
                             </Card>
-                        </Grid>
+                        </ListItem>
                     ))}
-                </Grid>
+                </List>
             ) : (
                 <Typography variant="subtitle1">No hay reuniones disponibles.</Typography>
             )}

@@ -87,17 +87,15 @@ export function Chat() {
   const handleSendMessage = () => {
     if (newMessage.trim() !== '' && currentUser) {
       const message: Message = { user: currentUser.username, content: newMessage };
-      // Enviar el mensaje al servidor y esperar confirmación antes de actualizar localmente
       socket?.emit('event-message', { room: 'global_chat', message: newMessage, user: currentUser.username }, (response: any) => {
-        // La respuesta del servidor confirma que el mensaje ha sido enviado correctamente
+       
         if (response.success) {
           setNewMessage('');
           setMessages((prevMessages) => [...prevMessages, message]);
         }
       });
     }
-  };
-
+  }
   const toggleChat = () => {
     setIsChatOpen(!isChatOpen);
   };
