@@ -9,6 +9,7 @@ import { useTheme } from '@mui/material/styles';
 const UserMeets: React.FC = () => {
     const theme = useTheme();
     const { loading, error, data, refetch } = useQuery(GET_USER_MEETS);
+    console.log(data);
     const [finishMeet, { loading: mutationLoading }] = useMutation(FINISH_MEET, {
         onCompleted: () => refetch(), 
     });
@@ -39,7 +40,7 @@ const UserMeets: React.FC = () => {
 
     const meets = data?.getUserMeets?.data || [];
     const message = data?.getUserMeets?.message || '';
-
+    console.log("MEETS:", meets);
     return (
         <Container sx={{ padding: theme.spacing(2) }}>
             <Typography variant="h4" gutterBottom sx={{ marginBottom: theme.spacing(2) }}>User Meets</Typography>

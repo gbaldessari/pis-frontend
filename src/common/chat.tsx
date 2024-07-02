@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@apollo/client";
 import { io, Socket } from "socket.io-client";
-import { GET_USERS } from "../graphql/users.graphql";
+import { GET_USERS, GET_USER } from "../graphql/users.graphql";
 import {
   TextField,
   Grid,
@@ -22,9 +22,8 @@ import {
 import ChatIcon from "@mui/icons-material/Chat";
 
 type User = {
-    id: string;
-    username: string;
-    
+  id: string;
+  username: string;
 };
 
 type Message = {
@@ -33,28 +32,40 @@ type Message = {
 };
 
 export function Chat() {
-  const { loading, error, data } = useQuery(GET_USERS);
+  const { loading: loadingUsers, error: errorUsers, data: dataUsers } = useQuery(GET_USERS);
+  const { loading: loadingUser, error: errorUser, data: dataUser } = useQuery(GET_USER);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [newMessage, setNewMessage] = useState<string>('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<string>('');
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
 
-  // ver si necesito friltar solo por profesionales
-  useEffect(() => { 
-    if (data && data.users) {
-      setUsers(data.users);
+  useEffect(() => {
+    if (dataUsers && dataUsers.users) {
+      setUsers(dataUsers.users);
     }
-  }, [data]);
+  }, [dataUsers]);
 
   useEffect(() => {
-    const newSocket: Socket = io('http://localhost:3000');
+    if (dataUser && dataUser.user) {
+      setCurrentUser(dataUser.user.data);
+    }
+  }, [dataUser]);
+
+  useEffect(() => {
+    const newSocket: Socket = io('http://localhost:81', {
+      transports: ['websocket'],
+    });
     setSocket(newSocket);
 
     newSocket.on('connect', () => setIsConnected(true));
     newSocket.on('disconnect', () => setIsConnected(false));
+
+    // Unirse a la sala global al conectar
+    newSocket.emit('event-join', 'global_chat');
 
     return () => {
       newSocket.disconnect();
@@ -63,32 +74,33 @@ export function Chat() {
 
   useEffect(() => {
     if (socket) {
-      socket.on('message', (message: Message) => {
+      socket.on('new_message', (message: Message) => {
         setMessages((prevMessages) => [...prevMessages, message]);
       });
 
       return () => {
-        socket.off('message');
+        socket.off('new_message');
       };
     }
   }, [socket]);
 
   const handleSendMessage = () => {
-    if (newMessage.trim() !== '' && selectedUser) {
-      const message: Message = { user: selectedUser, content: newMessage };
-      socket?.emit('private_message', { to: selectedUser, message });
-      setNewMessage('');
-      setMessages((prevMessages) => [...prevMessages, message]);
+    if (newMessage.trim() !== '' && currentUser) {
+      const message: Message = { user: currentUser.username, content: newMessage };
+      // Enviar el mensaje al servidor y esperar confirmación antes de actualizar localmente
+      socket?.emit('event-message', { room: 'global_chat', message: newMessage, user: currentUser.username }, (response: any) => {
+        // La respuesta del servidor confirma que el mensaje ha sido enviado correctamente
+        if (response.success) {
+          setNewMessage('');
+          setMessages((prevMessages) => [...prevMessages, message]);
+        }
+      });
     }
   };
 
   const toggleChat = () => {
     setIsChatOpen(!isChatOpen);
   };
-
-  // COMENTADOS PARA PODER VER LO VISUAL 
-  //if (loading) return <p>Loading...</p>;
-  //if (error) return <p>Error: {error.message}</p>;
 
   return (
     <>
@@ -112,7 +124,7 @@ export function Chat() {
           <Box flexGrow={1} p={2} display="flex" flexDirection="column">
             <Typography variant="h6">{isConnected ? 'Conectado' : 'Desconectado'}</Typography>
             <FormControl fullWidth style={{ marginTop: 20 }}>
-              <InputLabel id="select-user-label">Selecionar Usuarior</InputLabel>
+              <InputLabel id="select-user-label">Seleccionar Usuario</InputLabel>
               <Select
                 labelId="select-user-label"
                 value={selectedUser}

@@ -25,6 +25,7 @@ export const GET_MEETS = gql`
           id
           username
           email
+          address
         }
         requestsCount
       }
