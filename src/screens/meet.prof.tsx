@@ -63,7 +63,7 @@ const ProfMeets: React.FC = () => {
   }
 
   const handleRemoveJob = (id: number) => {
-    console.log('Removing Job ID:', id);
+    
     removeJob({ variables: { id } });
   };
 

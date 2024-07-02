@@ -18,7 +18,7 @@ export const ForgottenPasswordPage: React.FC<{}> = () => {
   const dataRecover = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setRecoverData({ ...recoverData, [name]: value });
-    // Limpiar el error cuando el usuario comience a escribir en un campo
+    
     setErrors({ ...errors, [name]: "" });
   };
 
@@ -26,7 +26,7 @@ export const ForgottenPasswordPage: React.FC<{}> = () => {
     event.preventDefault();
     const newErrors: Partial<RecoverType> = {};
 
-    // Validar el correo electrónico
+    
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(recoverData.email)) {
       newErrors.email = "Correo electrónico inválido";
