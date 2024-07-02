@@ -134,15 +134,9 @@ export const GET_FIVE_FAVORITE_JOBS = gql`
   }
 `;
 
-/**
- 
-Fetches available times for a specific date.
-@param {String} date - The date to get available times for.
-@return {String[]} A list of available times.
-*/
 export const GET_AVAILABLE_TIMES = gql`
-  query getAvailableTimes($date: String!) {
-    getAvailableTimes(date: $date){
+  query getAvailableTimes($idProfessional: Int!, $date: String!) {
+    getAvailableTimes(avaibleTimesInput: { idProfessional: $idProfessional, date: $date }) {
       data
       message
       success
@@ -273,7 +267,6 @@ export const EDIT_USER = gql`
     }
   }
 `;
-
 /**
  * Requests a password reset.
  * @param {String} email - The email of the user.

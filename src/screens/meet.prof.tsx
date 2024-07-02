@@ -166,7 +166,7 @@ const ProfMeets: React.FC = () => {
           <TextField
             name="price"
             label="Precio"
-            type="number" // Ensure the input type is number
+            type="number" 
             value={editJob.price}
             onChange={handleInputChange}
             fullWidth

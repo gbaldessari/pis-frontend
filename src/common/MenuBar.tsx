@@ -43,7 +43,7 @@ const MenuBar: React.FC = () => {
         break;
       case 'Perfil':
         navigate('/profile');
-        break;  
+        break;   
       default:
         break;
     }
@@ -59,7 +59,6 @@ const MenuBar: React.FC = () => {
     { text: 'Perfil', icon: <Person2 /> },
     { text: 'Comentarios', icon: <ModeCommentOutlined /> },
     { text: 'Hacer Comentario', icon: <AddComment /> },
-    
   ];
 
   

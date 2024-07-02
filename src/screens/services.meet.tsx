@@ -23,13 +23,14 @@ import StarBorderIcon from '@mui/icons-material/StarBorder';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { CREATE_MEET } from '../graphql/meets.graphql';
 import { GET_REVIEWS_BY_JOB, GET_JOBS } from '../graphql/jobs.graphql';
-
+import { GET_AVAILABLE_TIMES } from '../graphql/users.graphql';
 interface Service {
   id: number;
   jobName: string;
   price: number;
   idProfessional: {
     username: string;
+    id: number;
   };
   averageRate: number;
   description: string;
@@ -110,12 +111,23 @@ const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
   const [meetDetails, setMeetDetails] = useState({
     idJob: 0,
     meetDate: '',
-    startTime: '',
+    selectedTime: '',
     endTime: '',
   });
-
+  const handleCreateMeet = () => {
+    createMeet({
+      variables: {
+        idJob: meetDetails.idJob,
+        meetDate: meetDetails.meetDate,
+        startTime: meetDetails.selectedTime,
+        endTime: meetDetails.endTime,
+      },
+    });
+  };
   const [showEditFields, setShowEditFields] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+  const [availableTimesAlert, setAvailableTimesAlert] = useState<string | null>(null);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -141,6 +153,35 @@ const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
     },
   });
 
+  const [getAvailableTimes, { loading: loadingAvailableTimes }] = useLazyQuery(GET_AVAILABLE_TIMES, {
+    onCompleted: (data) => {
+      setAvailableTimes(data.getAvailableTimes.data);
+      if (data.getAvailableTimes.data.length === 0) {
+        setAvailableTimesAlert('No hay horarios disponibles para la fecha seleccionada.');
+      } else {
+        setAvailableTimesAlert('Horarios disponibles cargados exitosamente.');
+      }
+    },
+    onError: (error) => {
+      setAvailableTimesAlert(`Error al obtener los horarios disponibles: ${error.message}`);
+      console.error('Error al obtener los horarios disponibles:', error);
+    },
+  });
+
+  const handleLoadAvailableTimes = (idProfessional: number) => {
+    if (meetDetails.meetDate) {
+      console.log('Cargando horarios disponibles con:', { idProfessional, date: meetDetails.meetDate });
+      getAvailableTimes({ variables: { idProfessional, date: meetDetails.meetDate } });
+    }
+  };
+
+  const handleSelectTime = (time: string) => {
+    setMeetDetails({
+      ...meetDetails,
+      selectedTime: time,
+    });
+  };
+
   return (
     <div>
       {services.map((service) => (
@@ -159,7 +200,7 @@ const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
               <Typography variant="body1" color="textSecondary" gutterBottom>
                 Profesional: {service.idProfessional.username}
               </Typography>
-              {showEditFields && (
+              {showEditFields && meetDetails.idJob === service.id && (
                 <>
                   <TextField
                     type="date"
@@ -173,21 +214,26 @@ const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
                     }}
                     style={{ marginBottom: 10 }}
                   />
-                  <TextField
-                    type="time"
-                    name="startTime"
-                    label="Hora de inicio"
-                    value={meetDetails.startTime}
-                    onChange={handleInputChange}
-                    fullWidth
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    inputProps={{
-                      step: 300,
-                    }}
-                    style={{ marginBottom: 10 }}
-                  />
+                  <Button variant="outlined" onClick={() => handleLoadAvailableTimes(service.idProfessional.id)} disabled={!meetDetails.meetDate}>
+                    Cargar Horarios Disponibles
+                  </Button>
+                  {loadingAvailableTimes && <CircularProgress size={24} style={{ marginLeft: 15 }} />}
+                  {availableTimesAlert && <Alert severity={availableTimes.length === 0 ? 'error' : 'success'}>{availableTimesAlert}</Alert>}
+                  {availableTimes.length > 0 && (
+                    <div>
+                      <Typography variant="body1" color="textSecondary" style={{ marginTop: 10 }}>Selecciona un horario:</Typography>
+                      {availableTimes.map((time) => (
+                        <Button
+                          key={time}
+                          variant="outlined"
+                          onClick={() => handleSelectTime(time)}
+                          style={{ margin: '5px' }}
+                        >
+                          {time}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
                   <TextField
                     type="time"
                     name="endTime"
@@ -198,9 +244,6 @@ const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
                     InputLabelProps={{
                       shrink: true,
                     }}
-                    inputProps={{
-                      step: 300,
-                    }}
                     style={{ marginBottom: 10 }}
                   />
                 </>
@@ -209,17 +252,22 @@ const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
             </CardContent>
           </CardActionArea>
           <CardActions>
-            {showEditFields ? (
+            {showEditFields && meetDetails.idJob === service.id ? (
               <>
-                <Button fullWidth onClick={() => createMeet({ variables: meetDetails })}>
-                  Crear Encuentro
-                </Button>
+                {meetDetails.selectedTime && meetDetails.endTime && (
+                  <Button fullWidth onClick={handleCreateMeet}>
+                    Crear Encuentro
+                  </Button>
+                )}
                 <Button fullWidth onClick={() => setShowEditFields(false)}>
                   Cancelar
                 </Button>
               </>
             ) : (
-              <Button fullWidth onClick={() => setShowEditFields(true)}>
+              <Button fullWidth onClick={() => {
+                setMeetDetails({ ...meetDetails, idJob: service.id });
+                setShowEditFields(true);
+              }}>
                 Agregar Encuentro
               </Button>
             )}
