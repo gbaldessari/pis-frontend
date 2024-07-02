@@ -79,7 +79,7 @@ const ReviewsByJob: React.FC<{ jobId: number }> = ({ jobId }) => {
 
   const handleFetchReviews = () => {
     setLoadingReviews(true);
-    getReviewsByJob({ variables: { idJob: jobId } });
+    getReviewsByJob({ variables: { id: jobId } });
   };
 
   return (
@@ -118,7 +118,7 @@ const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
     const startTimeParts = meetDetails.selectedTime.split(':');
     const startHour = parseInt(startTimeParts[0]);
     const startMinute = parseInt(startTimeParts[1]);
-    const startSecond = parseInt(startTimeParts[2] || '00'); // Assume seconds as '00' if not provided
+    const startSecond = parseInt(startTimeParts[2] || '00'); 
 
     const endMinute = startMinute + 45;
     const endHour = startHour + Math.floor(endMinute / 60);

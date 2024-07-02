@@ -245,8 +245,8 @@ Fetches reviews for a specific job.
 @return {Object[]} A list of reviews for the specified job, a message, and a success flag.
 */
 export const GET_REVIEWS_BY_JOB = gql`
-  query getReviewsByJob($idJob: Int!) {
-    getReviewsByJob(idJob: $idJob) {
+  query getReviewsByJob($id: Int!) {
+    getReviewsByJob(id: $id) {
       data {
         id
         comment

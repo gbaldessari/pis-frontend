@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@apollo/client";
 import { io, Socket } from "socket.io-client";
-import { GET_USERS, GET_USER } from "../graphql/users.graphql";
+import { GET_USERS, GET_USER, GET_USER_CHATS } from "../graphql/users.graphql";
 import {
   TextField,
   Grid,
@@ -32,7 +32,7 @@ type Message = {
 };
 
 export function Chat() {
-  const { loading: loadingUsers, error: errorUsers, data: dataUsers } = useQuery(GET_USERS);
+  const { loading: loadingUsers, error: errorUsers, data: dataUsers } = useQuery(GET_USER_CHATS);
   const { loading: loadingUser, error: errorUser, data: dataUser } = useQuery(GET_USER);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
@@ -87,15 +87,17 @@ export function Chat() {
   const handleSendMessage = () => {
     if (newMessage.trim() !== '' && currentUser) {
       const message: Message = { user: currentUser.username, content: newMessage };
+      // Enviar el mensaje al servidor y esperar confirmación antes de actualizar localmente
       socket?.emit('event-message', { room: 'global_chat', message: newMessage, user: currentUser.username }, (response: any) => {
-       
+        // La respuesta del servidor confirma que el mensaje ha sido enviado correctamente
         if (response.success) {
           setNewMessage('');
           setMessages((prevMessages) => [...prevMessages, message]);
         }
       });
     }
-  }
+  };
+
   const toggleChat = () => {
     setIsChatOpen(!isChatOpen);
   };
