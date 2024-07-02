@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { GET_USER_MEETS, FINISH_MEET } from '../graphql/meets.graphql';
 import { 
-    List, ListItem, Card, CardContent, Typography, CircularProgress, Alert, Container, Box, Button, Grid 
+    List, ListItem, Card, CardContent, Typography, CircularProgress, Alert, Container, Box, Button, Grid, Dialog, DialogTitle, DialogContent 
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import { GoogleMap, LoadScript, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
 
 const UserMeets: React.FC = () => {
     const theme = useTheme();
@@ -12,6 +13,43 @@ const UserMeets: React.FC = () => {
     const [finishMeet, { loading: mutationLoading }] = useMutation(FINISH_MEET, {
         onCompleted: () => refetch(), 
     });
+
+    const [openMap, setOpenMap] = useState(false);
+    const [selectedMeet, setSelectedMeet] = useState(null);
+    const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
+
+    const handleMapOpen = (meet: any) => {
+        setSelectedMeet(meet);
+        setOpenMap(true);
+        fetchDirections(meet);
+    };
+
+    const handleMapClose = () => {
+        setOpenMap(false);
+        setSelectedMeet(null);
+        setDirections(null);
+    };
+
+    const fetchDirections = (meet: any) => {
+        const service = new google.maps.DirectionsService();
+        const origin = meet.idJob.idProfessional.address;
+        const destination = meet.idUser.address;
+
+        service.route(
+            {
+                origin,
+                destination,
+                travelMode: google.maps.TravelMode.DRIVING,
+            },
+            (result, status) => {
+                if (status === google.maps.DirectionsStatus.OK) {
+                    setDirections(result);
+                } else {
+                    console.error(`Error fetching directions: ${status}`);
+                }
+            }
+        );
+    };
 
     if (loading) {
         return (
@@ -34,7 +72,7 @@ const UserMeets: React.FC = () => {
     }
 
     const handleFinishMeet = (id: string) => {     
-        finishMeet({ variables: { idMeet: parseInt(id) } })
+        finishMeet({ variables: { idMeet: parseInt(id) } });
     };
 
     const meets = data?.getUserMeets?.data || [];
@@ -64,15 +102,25 @@ const UserMeets: React.FC = () => {
                                     <Typography>Hora de Término: {meet.endTime}</Typography>
                                     <Typography>Estado: {meet.isDone ? 'Finalizado' : 'En Proceso'}</Typography>
                                     {!meet.isDone && (
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            sx={{ marginTop: theme.spacing(2) }}
-                                            onClick={() => handleFinishMeet(meet.id)}
-                                            disabled={mutationLoading}
-                                        >
-                                            {mutationLoading ? <CircularProgress size={24} /> : 'Finalizar Servicio'}
-                                        </Button>
+                                        <Box display="flex" justifyContent="space-between">
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                sx={{ marginTop: theme.spacing(2) }}
+                                                onClick={() => handleFinishMeet(meet.id)}
+                                                disabled={mutationLoading}
+                                            >
+                                                {mutationLoading ? <CircularProgress size={24} /> : 'Finalizar Servicio'}
+                                            </Button>
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                sx={{ marginTop: theme.spacing(2) }}
+                                                onClick={() => handleMapOpen(meet)}
+                                            >
+                                                Ver Mapa de Recorrido
+                                            </Button>
+                                        </Box>
                                     )}
                                 </CardContent>
                             </Card>
@@ -82,6 +130,20 @@ const UserMeets: React.FC = () => {
             ) : (
                 <Typography variant="subtitle1">No hay reuniones disponibles.</Typography>
             )}
+            <Dialog open={openMap} onClose={handleMapClose} maxWidth="md" fullWidth>
+                <DialogTitle>Mapa de Recorrido</DialogTitle>
+                <DialogContent>
+                    <LoadScript googleMapsApiKey="AIzaSyCxydBX49WaTyeAs_IllYHh6TPu8mmuj2w">
+                        <GoogleMap
+                            mapContainerStyle={{ height: '400px', width: '100%' }}
+                            zoom={14}
+                            center={directions?.routes[0]?.legs[0]?.start_location || { lat: 0, lng: 0 }}
+                        >
+                            {directions && <DirectionsRenderer directions={directions} />}
+                        </GoogleMap>
+                    </LoadScript>
+                </DialogContent>
+            </Dialog>
         </Container>
     );
 };

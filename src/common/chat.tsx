@@ -50,7 +50,7 @@ export function Chat() {
   }, [data]);
 
   useEffect(() => {
-    const newSocket: Socket = io('http://localhost:3000');
+    const newSocket: Socket = io('http://localhost:81');
     setSocket(newSocket);
 
     newSocket.on('connect', () => setIsConnected(true));
