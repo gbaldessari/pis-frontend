@@ -1,6 +1,6 @@
 import React from "react";
 import { useQuery } from "@apollo/client";
-import { GET_FIVE_FAVORITE_JOBS } from "../graphql/users.graphql";
+import { GET_FIVE_FAVORITE_JOBS, GET_TOTAL_SALES_GENERATED, GET_TOTAL_SALES_MONTH } from "../graphql/users.graphql";
 import {
   Container,
   Typography,
@@ -31,12 +31,16 @@ type Job = {
 };
 
 const FiveFavoriteJobs: React.FC = () => {
-  const { loading, error, data } = useQuery<{ fiveFavoritesJobs: { data: Job[] } }>(GET_FIVE_FAVORITE_JOBS);
-  console.log(data);
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
+  const { loading: loadingJobs, error: errorJobs, data: dataJobs } = useQuery<{ fiveFavoritesJobs: { data: Job[] } }>(GET_FIVE_FAVORITE_JOBS);
+  const { loading: loadingTotalSalesGenerated, error: errorTotalSalesGenerated, data: dataTotalSalesGenerated } = useQuery(GET_TOTAL_SALES_GENERATED);
+  const { loading: loadingTotalSalesMonth, error: errorTotalSalesMonth, data: dataTotalSalesMonth } = useQuery(GET_TOTAL_SALES_MONTH);
 
-  const { fiveFavoritesJobs } = data || {};
+  if (loadingJobs || loadingTotalSalesGenerated || loadingTotalSalesMonth) return <p>Loading...</p>;
+  if (errorJobs || errorTotalSalesGenerated || errorTotalSalesMonth) return <p>Error</p>;
+
+  const { fiveFavoritesJobs } = dataJobs || {};
+  const totalSalesGenerated = dataTotalSalesGenerated?.totalSalesGenerated?.data;
+  const totalSalesMonth = dataTotalSalesMonth?.totalSalesMonth?.data;
 
   return (
     <Container maxWidth="md">
@@ -60,6 +64,12 @@ const FiveFavoriteJobs: React.FC = () => {
           ))}
         </List>
       </Paper>
+      <Typography variant="h5" gutterBottom>
+        Total Ventas Generadas:$ {totalSalesGenerated}
+      </Typography>
+      <Typography variant="h5" gutterBottom>
+        Total Ventas del Mes:$ {totalSalesMonth}
+      </Typography>
     </Container>
   );
 };

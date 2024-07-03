@@ -221,7 +221,7 @@ const ServiceList: React.FC<{ services: Service[], filterText: string, selectedC
                 {service.jobName}
               </Typography>
               <Typography variant="body1" color="textSecondary" gutterBottom>
-                Precio: {service.price}
+                Precio:$ {service.price}
               </Typography>
               <Typography variant="body1" color="textSecondary" gutterBottom>
                 Descripción: {service.description}

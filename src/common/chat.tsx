@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@apollo/client";
 import { io, Socket } from "socket.io-client";
-import { GET_USERS, GET_USER, GET_USER_CHATS } from "../graphql/users.graphql";
+import { GET_USER, GET_USER_CHATS } from "../graphql/users.graphql";
 import {
   TextField,
   Grid,
@@ -32,7 +32,7 @@ type Message = {
 };
 
 export function Chat() {
-  const { loading: loadingUsers, error: errorUsers, data: dataUsers } = useQuery(GET_USER_CHATS);
+  const { loading: loadingUserChats, error: errorUserChats, data: dataUserChats, refetch: refetchUserChats } = useQuery(GET_USER_CHATS);
   const { loading: loadingUser, error: errorUser, data: dataUser } = useQuery(GET_USER);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
@@ -43,11 +43,16 @@ export function Chat() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
 
+  const { data: userChatsData } = useQuery(GET_USER_CHATS, {
+    variables: { userId: selectedUser },
+    skip: !selectedUser
+  });
+
   useEffect(() => {
-    if (dataUsers && dataUsers.users) {
-      setUsers(dataUsers.users);
+    if (dataUserChats && dataUserChats.getUserChats) {
+      setUsers(dataUserChats.getUserChats.data);
     }
-  }, [dataUsers]);
+  }, [dataUserChats]);
 
   useEffect(() => {
     if (dataUser && dataUser.user) {
@@ -86,9 +91,8 @@ export function Chat() {
   const handleSendMessage = () => {
     if (newMessage.trim() !== '' && currentUser) {
       const message: Message = { user: currentUser.username, content: newMessage };
-      // Enviar el mensaje al servidor y esperar confirmación antes de actualizar localmente
+     
       socket?.emit('event-message', { room: 'global_chat', message: newMessage, user: currentUser.username }, (response: any) => {
-        // La respuesta del servidor confirma que el mensaje ha sido enviado correctamente
         if (response.success) {
           setNewMessage('');
           setMessages((prevMessages) => [...prevMessages, message]);
@@ -100,6 +104,12 @@ export function Chat() {
   const toggleChat = () => {
     setIsChatOpen(!isChatOpen);
   };
+
+  useEffect(() => {
+    if (selectedUser) {
+      refetchUserChats({ userId: selectedUser });
+    }
+  }, [selectedUser, refetchUserChats]);
 
   return (
     <>
@@ -138,6 +148,11 @@ export function Chat() {
             </FormControl>
             <Paper style={{ flexGrow: 1, padding: 20, marginTop: 20, overflowY: 'auto' }}>
               <List>
+                {userChatsData?.getUserChats.data?.map((user: User) => (
+                  <ListItem key={user.id}>
+                    <ListItemText primary={user.username} />
+                  </ListItem>
+                ))}
                 {messages.map((msg, index) => (
                   <ListItem key={index}>
                     <ListItemText primary={`${msg.user}: ${msg.content}`} />
