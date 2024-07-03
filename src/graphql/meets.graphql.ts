@@ -126,6 +126,38 @@ export const GET_USER_MEETS = gql`
   }
   }
 `;
+
+export const GET_PROFESSIONAL_MEETS = gql`
+  query getProfessionalMeets {
+    getProfessionalMeets {
+      data {
+        id
+        idJob {
+          id
+          jobName
+          description
+          averageRate
+          idCategory {
+            id
+            categoryName
+          }
+          idProfessional {
+            id
+            username
+            email
+          }
+          requestsCount
+        }
+        meetDate
+        startTime
+        endTime
+        isDone
+      }
+      message
+      success
+    }
+  }
+`;
 // ------------------- MUTATIONS ------------------- //
 
 // ------------------- Meets ------------------- //

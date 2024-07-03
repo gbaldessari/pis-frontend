@@ -1,25 +1,30 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
-import { GET_USER_MEETS, FINISH_MEET } from '../graphql/meets.graphql';
+import { GET_USER_MEETS, GET_PROFESSIONAL_MEETS, FINISH_MEET } from '../graphql/meets.graphql';
 import {
-    Card, CardContent, Typography, CircularProgress, Alert, Container, Box, Button, Grid, Dialog, DialogTitle, DialogContent
+    Card, CardContent, Typography, CircularProgress, Alert, Container, Box, Button, Grid, Dialog, DialogTitle, DialogContent, Tabs, Tab
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { GoogleMap, LoadScript, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
 
-const MAP_API_KEY = 'AIzaSyCxydBX49WaTyeAs_IllYHh6TPu8mmuj2w'; 
+const MAP_API_KEY = 'YOUR_GOOGLE_MAPS_API_KEY'; // Reemplaza con tu API key
 
 const UserMeets: React.FC = () => {
     const theme = useTheme();
-    const { loading, error, data, refetch } = useQuery(GET_USER_MEETS);
+    const { loading: loadingUserMeets, error: errorUserMeets, data: dataUserMeets, refetch: refetchUserMeets } = useQuery(GET_USER_MEETS);
+    const { loading: loadingProfessionalMeets, error: errorProfessionalMeets, data: dataProfessionalMeets, refetch: refetchProfessionalMeets } = useQuery(GET_PROFESSIONAL_MEETS);
     const [finishMeet, { loading: mutationLoading }] = useMutation(FINISH_MEET, {
-        onCompleted: () => refetch(),
+        onCompleted: () => {
+            refetchUserMeets();
+            refetchProfessionalMeets();
+        },
     });
 
     const [openMap, setOpenMap] = useState(false);
     const [selectedMeet, setSelectedMeet] = useState<any>(null);
     const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
     const [googleMapsLoaded, setGoogleMapsLoaded] = useState(false);
+    const [selectedTab, setSelectedTab] = useState(0);
 
     const handleMapOpen = (meet: any) => {
         setSelectedMeet(meet);
@@ -83,76 +88,86 @@ const UserMeets: React.FC = () => {
         }
     }, [selectedMeet, googleMapsLoaded, fetchDirections]);
 
-    if (loading) {
-        return (
-            <Container>
-                <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-                    <CircularProgress />
-                </Box>
-            </Container>
-        );
-    }
-
-    if (error) {
-        return (
-            <Container>
-                <Box mt={4}>
-                    <Alert severity="error" sx={{ mt: 2 }}>Error: {error.message}</Alert>
-                </Box>
-            </Container>
-        );
-    }
+    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+        setSelectedTab(newValue);
+    };
 
     const handleFinishMeet = (id: string) => {
         finishMeet({ variables: { idMeet: parseInt(id) } });
     };
 
-    const meets = data?.getUserMeets?.data || [];
-    const message = data?.getUserMeets?.message || '';
+    const renderMeets = (meets: any[], message: string, error: any, loading: boolean) => {
+        if (loading) {
+            return (
+                <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+                    <CircularProgress />
+                </Box>
+            );
+        }
+
+        if (error) {
+            return (
+                <Box mt={4}>
+                    <Alert severity="error" sx={{ mt: 2 }}>Error: {error.message}</Alert>
+                </Box>
+            );
+        }
+
+        return (
+            <>
+                {message && (
+                    <Alert severity="success" sx={{ marginTop: theme.spacing(2) }}>
+                        {message}
+                    </Alert>
+                )}
+                {meets.length > 0 ? (
+                    <Grid container>
+                        {meets.map((meet: any) => (
+                            <Grid item xs={12} key={meet.id}>
+                                <Card sx={{ width: '100%', marginBottom: theme.spacing(2) }}>
+                                    <CardContent>
+                                        <Typography variant="h6">{meet.idJob.jobName}</Typography>
+                                        <Typography>Descripción: {meet.idJob.description}</Typography>
+                                        <Typography>Estrellas: {meet.idJob.averageRate}</Typography>
+                                        <Typography>Categoría: {meet.idJob.idCategory.categoryName}</Typography>
+                                        <Typography>Trabajador: {meet.idJob.idProfessional.username} ({meet.idJob.idProfessional.email})</Typography>
+                                        <Typography>Fecha Reunión: {meet.meetDate}</Typography>
+                                        <Typography>Hora Inicio: {meet.startTime}</Typography>
+                                        <Typography>Hora de Término: {meet.endTime}</Typography>
+                                        <Typography>Estado: {meet.isDone ? 'Finalizado' : 'En Proceso'}</Typography>
+                                        {!meet.isDone && (
+                                            <Box display="flex" justifyContent="space-between">
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    sx={{ marginTop: theme.spacing(2) }}
+                                                    onClick={() => handleMapOpen(meet)}
+                                                >
+                                                    Ver Mapa de Recorrido
+                                                </Button>
+                                            </Box>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        ))}
+                    </Grid>
+                ) : (
+                    <Typography variant="subtitle1">No hay reuniones disponibles.</Typography>
+                )}
+            </>
+        );
+    };
 
     return (
         <Container sx={{ padding: theme.spacing(2) }}>
-            <Typography variant="h4" gutterBottom sx={{ marginBottom: theme.spacing(2) }}>User Meets</Typography>
-            {message && (
-                <Alert severity={data.getUserMeets.success ? "success" : "warning"} sx={{ marginTop: theme.spacing(2) }}>
-                    {message}
-                </Alert>
-            )}
-            {meets.length > 0 ? (
-                <Grid container>
-                    {meets.map((meet: any) => (
-                        <Grid item xs={12} key={meet.id}>
-                            <Card sx={{ width: '100%', marginBottom: theme.spacing(2) }}>
-                                <CardContent>
-                                    <Typography variant="h6">{meet.idJob.jobName}</Typography>
-                                    <Typography>Descripción: {meet.idJob.description}</Typography>
-                                    <Typography>Estrellas: {meet.idJob.averageRate}</Typography>
-                                    <Typography>Categoría: {meet.idJob.idCategory.categoryName}</Typography>
-                                    <Typography>Trabajador: {meet.idJob.idProfessional.username} ({meet.idJob.idProfessional.email})</Typography>
-                                    <Typography>Fecha Reunión: {meet.meetDate}</Typography>
-                                    <Typography>Hora Inicio: {meet.startTime}</Typography>
-                                    <Typography>Hora de Término: {meet.endTime}</Typography>
-                                    <Typography>Estado: {meet.isDone ? 'Finalizado' : 'En Proceso'}</Typography>
-                                    {!meet.isDone && (
-                                        <Box display="flex" justifyContent="space-between">
-                                            <Button
-                                                variant="contained"
-                                                color="primary"
-                                                sx={{ marginTop: theme.spacing(2) }}
-                                                onClick={() => handleMapOpen(meet)}
-                                            >
-                                                Ver Mapa de Recorrido
-                                            </Button>
-                                        </Box>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        </Grid>
-                    ))}
-                </Grid>
-            ) : (
-                <Typography variant="subtitle1">No hay reuniones disponibles.</Typography>
-            )}
+            <Typography variant="h4" gutterBottom sx={{ marginBottom: theme.spacing(2) }}>Mis Reuniones</Typography>
+            <Tabs value={selectedTab} onChange={handleTabChange}>
+                <Tab label="Como Usuario" />
+                <Tab label="Como Profesional" />
+            </Tabs>
+            {selectedTab === 0 && renderMeets(dataUserMeets?.getUserMeets?.data || [], dataUserMeets?.getUserMeets?.message || '', errorUserMeets, loadingUserMeets)}
+            {selectedTab === 1 && renderMeets(dataProfessionalMeets?.getProfessionalMeets?.data || [], dataProfessionalMeets?.getProfessionalMeets?.message || '', errorProfessionalMeets, loadingProfessionalMeets)}
             <Dialog open={openMap} onClose={handleMapClose} maxWidth="md" fullWidth>
                 <DialogTitle>Mapa de Recorrido</DialogTitle>
                 <DialogContent>
