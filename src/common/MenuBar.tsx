@@ -14,7 +14,7 @@ const MenuBar: React.FC = () => {
 
   const handleListItemClick = (text: string) => {
     switch (text) {
-      case 'Servicios Disponibles':
+      case 'Home':
         navigate('/services');
         break;
       case 'Agregar Servicios':
@@ -24,9 +24,6 @@ const MenuBar: React.FC = () => {
         Cookies.remove('token');
         window.location.reload();
         navigate('/login');
-        break;
-      case 'Home':
-        navigate('/home');
         break;
       case 'Mis Reuniones':
         navigate('/userMeets');
@@ -43,7 +40,7 @@ const MenuBar: React.FC = () => {
       case 'Perfil':
         navigate('/profile');
         break;
-      case 'Top5':
+      case 'Reporteria':
         navigate('/favorite_job');
         break;
       default:
@@ -59,7 +56,6 @@ const MenuBar: React.FC = () => {
 
   const menuItems = [
     { text: 'Mis Reuniones', icon: <Bookmark /> },
-    { text: 'Servicios Disponibles', icon: <Business /> },
     { text: 'Home', icon: <Home /> },
     { text: 'Perfil', icon: <Person2 /> },
     { text: 'Comentarios', icon: <ModeCommentOutlined /> },
@@ -70,7 +66,7 @@ const MenuBar: React.FC = () => {
     menuItems.push(
       { text: 'Mis Servicios', icon: <Storage /> },
       { text: 'Agregar Servicios', icon: <AddBusiness /> },
-      { text: 'Top5', icon: <MilitaryTech /> }
+      { text: 'Reporteria', icon: <MilitaryTech /> }
     );
   }
 

@@ -96,7 +96,7 @@ const UserMeets: React.FC = () => {
         finishMeet({ variables: { idMeet: parseInt(id) } });
     };
 
-    const renderMeets = (meets: any[], message: string, error: any, loading: boolean) => {
+    const renderMeets = (meets: any[], message: string, error: any, loading: boolean, isProfessional: boolean = false) => {
         if (loading) {
             return (
                 <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
@@ -145,6 +145,17 @@ const UserMeets: React.FC = () => {
                                                 >
                                                     Ver Mapa de Recorrido
                                                 </Button>
+                                                {isProfessional && (
+                                                    <Button
+                                                        variant="contained"
+                                                        color="secondary"
+                                                        sx={{ marginTop: theme.spacing(2) }}
+                                                        onClick={() => handleFinishMeet(meet.id)}
+                                                        disabled={mutationLoading}
+                                                    >
+                                                        Terminar Reunión
+                                                    </Button>
+                                                )}
                                             </Box>
                                         )}
                                     </CardContent>
@@ -167,7 +178,7 @@ const UserMeets: React.FC = () => {
                 <Tab label="Como Profesional" />
             </Tabs>
             {selectedTab === 0 && renderMeets(dataUserMeets?.getUserMeets?.data || [], dataUserMeets?.getUserMeets?.message || '', errorUserMeets, loadingUserMeets)}
-            {selectedTab === 1 && renderMeets(dataProfessionalMeets?.getProfessionalMeets?.data || [], dataProfessionalMeets?.getProfessionalMeets?.message || '', errorProfessionalMeets, loadingProfessionalMeets)}
+            {selectedTab === 1 && renderMeets(dataProfessionalMeets?.getProfessionalMeets?.data || [], dataProfessionalMeets?.getProfessionalMeets?.message || '', errorProfessionalMeets, loadingProfessionalMeets, true)}
             <Dialog open={openMap} onClose={handleMapClose} maxWidth="md" fullWidth>
                 <DialogTitle>Mapa de Recorrido</DialogTitle>
                 <DialogContent>

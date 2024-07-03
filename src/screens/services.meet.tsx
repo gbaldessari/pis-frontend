@@ -1,22 +1,26 @@
 import React, { useState } from 'react';
-import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
+import { useQuery, useLazyQuery, useMutation } from '@apollo/client';
 import {
   Container,
+  CircularProgress,
+  Typography,
+  TextField,
+  Alert,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
   Card,
   CardActionArea,
   CardContent,
-  Typography,
   CardActions,
   Button,
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  TextField,
-  CircularProgress,
   List,
   ListItem,
   ListItemText,
-  Alert,
 } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
@@ -24,17 +28,24 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { CREATE_MEET } from '../graphql/meets.graphql';
 import { GET_REVIEWS_BY_JOB, GET_JOBS } from '../graphql/jobs.graphql';
 import { GET_AVAILABLE_TIMES } from '../graphql/users.graphql';
+import { GET_CATEGORIES } from '../graphql/jobs.graphql';
 
 interface Service {
   id: number;
   jobName: string;
   price: number;
+  idCategory: {
+    id: number;
+    categoryName: string;
+  };
   idProfessional: {
     username: string;
     id: number;
   };
   averageRate: number;
+  requestsCount: number;
   description: string;
+  
 }
 
 interface Review {
@@ -108,12 +119,13 @@ const ReviewsByJob: React.FC<{ jobId: number }> = ({ jobId }) => {
   );
 };
 
-const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
+const ServiceList: React.FC<{ services: Service[], filterText: string, selectedCategory: string }> = ({ services, filterText, selectedCategory }) => {
   const [meetDetails, setMeetDetails] = useState({
     idJob: 0,
     meetDate: '',
     selectedTime: '',
   });
+
   const handleCreateMeet = () => {
     const startTimeParts = meetDetails.selectedTime.split(':');
     const startHour = parseInt(startTimeParts[0]);
@@ -194,9 +206,14 @@ const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
     });
   };
 
+  const filteredServices = services.filter(service => 
+    (selectedCategory === '' || service.idCategory.id.toString() === selectedCategory) &&
+    service.jobName.toLowerCase().includes(filterText.toLowerCase())
+  );
+
   return (
     <div>
-      {services.map((service) => (
+      {filteredServices.map((service) => (
         <Card key={service.id} style={{ marginBottom: 10 }}>
           <CardActionArea>
             <CardContent>
@@ -208,6 +225,9 @@ const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
               </Typography>
               <Typography variant="body1" color="textSecondary" gutterBottom>
                 Descripción: {service.description}
+              </Typography>
+              <Typography variant="body1" color="textSecondary" gutterBottom>
+                Solicitudes: {service.requestsCount}
               </Typography>
               <Typography variant="body1" color="textSecondary" gutterBottom>
                 Profesional: {service.idProfessional.username}
@@ -284,18 +304,47 @@ const ServiceList: React.FC<{ services: Service[] }> = ({ services }) => {
   );
 };
 
-export const ServicesExample: React.FC = () => {
-  const { data, loading, error } = useQuery(GET_JOBS);
+const ServicesExample: React.FC = () => {
+  const { data: jobsData, loading: jobsLoading, error: jobsError } = useQuery(GET_JOBS);
+  const { data: categoriesData, loading: categoriesLoading, error: categoriesError } = useQuery(GET_CATEGORIES); // Consulta de categorías
 
-  if (loading) return <CircularProgress />;
-  if (error) return <Alert severity="error">{`Error: ${error.message}`}</Alert>;
+  const [filterText, setFilterText] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+
+  if (jobsLoading || categoriesLoading) return <CircularProgress />;
+  if (jobsError) return <Alert severity="error">{`Error: ${jobsError.message}`}</Alert>;
+  if (categoriesError) return <Alert severity="error">{`Error: ${categoriesError.message}`}</Alert>;
 
   return (
     <Container maxWidth="md">
       <Typography variant="h4" gutterBottom>
         Lista de Servicios
       </Typography>
-      <ServiceList services={data.jobs} />
+      <FormControl fullWidth variant="outlined" style={{ marginBottom: 20 }}>
+        <InputLabel id="category-label">Seleccionar Categoría</InputLabel>
+        <Select
+          labelId="category-label"
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value as string)}
+          label="Seleccionar Categoría"
+        >
+          <MenuItem value="">Todas las Categorías</MenuItem>
+          {categoriesData.categories.map((category: { id: number; categoryName: string }) => (
+            <MenuItem key={category.id} value={category.id.toString()}>
+              {category.categoryName}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <TextField
+        label="Filtrar por nombre de trabajo"
+        variant="outlined"
+        fullWidth
+        value={filterText}
+        onChange={(e) => setFilterText(e.target.value)}
+        style={{ marginBottom: 20 }}
+      />
+      <ServiceList services={jobsData.jobs} filterText={filterText} selectedCategory={selectedCategory} />
     </Container>
   );
 };
