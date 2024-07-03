@@ -64,7 +64,6 @@ export function Chat() {
     newSocket.on('connect', () => setIsConnected(true));
     newSocket.on('disconnect', () => setIsConnected(false));
 
-    // Unirse a la sala global al conectar
     newSocket.emit('event-join', 'global_chat');
 
     return () => {

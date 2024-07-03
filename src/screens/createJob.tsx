@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useMutation, useQuery } from "@apollo/client";
 import { CREATE_JOB, GET_CATEGORIES, CREATE_CATEGORY } from "../graphql/jobs.graphql";
 import {
@@ -39,6 +39,16 @@ const CreateJobForm: React.FC = () => {
     GET_CATEGORIES
   );
 
+  useEffect(() => {
+    
+    if (categoriesData?.categories && categoriesData.categories.length > 0) {
+      setJobData((prevJobData) => ({
+        ...prevJobData,
+        idCategory: categoriesData.categories[0].id,
+      }));
+    }
+  }, [categoriesData]);
+
   const [createJobMutation] = useMutation(CREATE_JOB, {
     onCompleted: (data) => {
       if (data.createJob.success) {
@@ -65,7 +75,7 @@ const CreateJobForm: React.FC = () => {
     onCompleted: (data) => {
       if (data.createCategory.success) {
         setAlertMessage("Categoría creada exitosamente");
-        refetch(); 
+        refetch();
       } else {
         setAlertMessage("Error al crear la categoría");
       }

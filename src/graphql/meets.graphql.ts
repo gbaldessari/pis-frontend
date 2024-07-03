@@ -108,6 +108,7 @@ export const GET_USER_MEETS = gql`
           id
           username
           email
+          address
         }
         requestsCount
       }
@@ -115,6 +116,7 @@ export const GET_USER_MEETS = gql`
         id
         username
         email
+        address
       }
       meetDate
       startTime
