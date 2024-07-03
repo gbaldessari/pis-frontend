@@ -137,7 +137,7 @@ export function Chat() {
               <Select
                 labelId="select-user-label"
                 value={selectedUser}
-                onChange={(e) => setSelectedUser(e.target.value as string)}
+                //onChange={(e) => setSelectedUser(e.target.value as string)}
               >
                 {users.map((user) => (
                   <MenuItem key={user.id} value={user.id}>

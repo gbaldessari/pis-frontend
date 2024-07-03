@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import {useNavigate} from "react-router-dom";
-import {Container, Grid, Paper, Typography, TextField, Button} from "@mui/material";
+import {Container, Grid, Paper, Typography, TextField, Button, Snackbar} from "@mui/material";
 import { REQUEST_PASSWORD_RESET } from "../graphql/users.graphql";
 import { useMutation } from "@apollo/client";
 
@@ -14,13 +14,27 @@ export const ForgottenPasswordPage: React.FC<{}> = () => {
   const [recoverData, setRecoverData] = useState<RecoverType>({
     email: ""
   });
-
+  const [existeCorreo, setExisteCorreo]= useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertOpen, setAlertOpen] = useState(false);
   const [errors, setErrors] = useState<Partial<RecoverType>>({});
 
-  const [forgotten, { loading, error }] = useMutation( REQUEST_PASSWORD_RESET);
-  if (loading) return 'Submitting...';
-  if (error) return `Submission error! ${error.message}`;
-
+  const [forgotten, { loading, error  }] = useMutation( REQUEST_PASSWORD_RESET, {
+    onCompleted: (data) => {
+      if (data.requestPasswordReset) {
+        setExisteCorreo(data.requestPasswordReset.success);
+        if(existeCorreo===true) {
+          setAlertMessage("Se ha enviado el correo de recuperación");
+        } else {
+          setAlertMessage(data.requestPasswordReset.message);
+        }
+      } else {
+        setAlertMessage("Error al enviar el datos");
+      }
+      setAlertOpen(true);
+    }
+  });
+  
   const dataRecover = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setRecoverData({ ...recoverData, [name]: value });
@@ -40,14 +54,21 @@ export const ForgottenPasswordPage: React.FC<{}> = () => {
 
     setErrors(newErrors);
 
-    if (Object.values(newErrors).some(error => error !== "")) {
+    forgotten({ variables: { email: recoverData.email }});
+
+    if (Object.values(newErrors).some(error => error !== "") || !existeCorreo) {
       return;
     }
 
-    forgotten({ variables: { email: recoverData.email }});
-
     navigate("/recover");
   };
+
+  const handleAlertClose = () => {
+    setAlertOpen(false);
+  };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
 
   return (
     <Container maxWidth="sm">
@@ -88,6 +109,18 @@ export const ForgottenPasswordPage: React.FC<{}> = () => {
           </Paper>
         </Grid>
       </Grid>
+
+      <Snackbar
+        open={alertOpen}
+        autoHideDuration={6000}
+        onClose={handleAlertClose}
+        message={alertMessage}
+        action={
+          <Button color="inherit" size="small" onClick={handleAlertClose}>
+            Cerrar
+          </Button>
+        }
+      />
     </Container>
   );
 };

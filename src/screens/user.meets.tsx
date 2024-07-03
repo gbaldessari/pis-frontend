@@ -7,7 +7,7 @@ import {
 import { useTheme } from '@mui/material/styles';
 import { GoogleMap, LoadScript, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
 
-const MAP_API_KEY = 'YOUR_GOOGLE_MAPS_API_KEY'; // Reemplaza con tu API key
+const MAP_API_KEY = 'AIzaSyCxydBX49WaTyeAs_IllYHh6TPu8mmuj2w';
 
 const UserMeets: React.FC = () => {
     const theme = useTheme();
@@ -26,6 +26,9 @@ const UserMeets: React.FC = () => {
     const [googleMapsLoaded, setGoogleMapsLoaded] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
 
+    //const meets = data?.getUserMeets?.data || [];
+    //const message = data?.getUserMeets?.message || '';
+
     const handleMapOpen = (meet: any) => {
         setSelectedMeet(meet);
         setOpenMap(true);
@@ -34,7 +37,6 @@ const UserMeets: React.FC = () => {
     const handleMapClose = () => {
         setOpenMap(false);
         setSelectedMeet(null);
-        setDirections(null);
     };
 
     const updateDirections = useCallback((newDirections: google.maps.DirectionsResult | null) => {
@@ -42,6 +44,11 @@ const UserMeets: React.FC = () => {
     }, []);
 
     const fetchDirections = useCallback((meet: any) => {
+        if (!meet.idJob.idProfessional || !meet.idUser) {
+            console.error('Missing address information');
+            return;
+        }
+
         const service = new google.maps.DirectionsService();
         const origin = meet.idJob.idProfessional.address;
         const destination = meet.idUser.address;
@@ -53,34 +60,40 @@ const UserMeets: React.FC = () => {
                 travelMode: google.maps.TravelMode.DRIVING,
             },
             (result, status) => {
-                if (status === google.maps.DirectionsStatus.OK) {
+                if (status === 'OK') {
                     updateDirections(result);
                 } else {
                     console.error(`Error fetching directions: ${status}`);
                 }
             }
         );
-    }, [updateDirections]);
+    }, []);
 
     useEffect(() => {
         const loadGoogleMapsScript = () => {
-            const scriptSrc = `https://maps.googleapis.com/maps/api/js?key=${MAP_API_KEY}&libraries=places&callback=initMap`;
-            const alreadyLoaded = document.querySelectorAll(`script[src="${scriptSrc}"]`).length > 0;
+            //const scriptSrc = `https://maps.googleapis.com/maps/api/js?key=${MAP_API_KEY}&libraries=places&callback=initMap`;
+            //const alreadyLoaded = document.querySelectorAll(`script[src="${scriptSrc}"]`).length > 0;
 
-            if (!alreadyLoaded) {
+            
                 const googleMapScript = document.createElement('script');
-                googleMapScript.src = scriptSrc;
+                //googleMapScript.src = scriptSrc
                 googleMapScript.async = true;
                 googleMapScript.onload = () => setGoogleMapsLoaded(true);
-                googleMapScript.onerror = () => console.error('Error loading Google Maps script');
                 document.head.appendChild(googleMapScript);
-            } else {
-                setGoogleMapsLoaded(true);
-            }
-        };
+                googleMapScript.onerror = () => console.error('Error loading Google Maps script');
+                
+                if (!window.google) {
+                    loadGoogleMapsScript();
+                } else {
+                    setGoogleMapsLoaded(true);
+                }
 
-        loadGoogleMapsScript();
-    }, []);
+                if (selectedMeet && googleMapsLoaded) {
+                    fetchDirections(selectedMeet);
+                }
+            }
+        
+        }, [selectedMeet, googleMapsLoaded, fetchDirections]);
 
     useEffect(() => {
         if (selectedMeet && googleMapsLoaded) {
