@@ -16,6 +16,7 @@ import CreateReview from "./screens/createReview";
 import ViewReviews from "./screens/review";
 import ProfMeets from "./screens/meet.prof";
 import FiveFavoriteJobs from "./screens/bestFiveJobs";
+import { ResetPasswordPage } from "./screens/recoverPassword";
 
 export const AppRoutes: React.FC<{}> = () => {
   return (
@@ -38,6 +39,7 @@ export const AppRoutes: React.FC<{}> = () => {
       <Route path="/login" element={<LoginPage/>} />
       <Route path="/forgotten" element={<ForgottenPasswordPage/>} />
       <Route path="/register" element={<RegisterPage/>} />
+      <Route path="/recover" element={<ResetPasswordPage/>} />
    </Routes>
   );
 };

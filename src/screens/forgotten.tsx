@@ -1,6 +1,8 @@
 import React, {useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {Container, Grid, Paper, Typography, TextField, Button} from "@mui/material";
+import { REQUEST_PASSWORD_RESET } from "../graphql/users.graphql";
+import { useMutation } from "@apollo/client";
 
 type RecoverType = {
   email: string;
@@ -14,6 +16,10 @@ export const ForgottenPasswordPage: React.FC<{}> = () => {
   });
 
   const [errors, setErrors] = useState<Partial<RecoverType>>({});
+
+  const [forgotten, { loading, error }] = useMutation( REQUEST_PASSWORD_RESET);
+  if (loading) return 'Submitting...';
+  if (error) return `Submission error! ${error.message}`;
 
   const dataRecover = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -38,8 +44,9 @@ export const ForgottenPasswordPage: React.FC<{}> = () => {
       return;
     }
 
+    forgotten({ variables: { email: recoverData.email }});
 
-    navigate("/home");
+    navigate("/recover");
   };
 
   return (

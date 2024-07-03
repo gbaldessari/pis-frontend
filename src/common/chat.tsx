@@ -69,7 +69,7 @@ export function Chat() {
     newSocket.on('connect', () => setIsConnected(true));
     newSocket.on('disconnect', () => setIsConnected(false));
 
-    newSocket.emit('event-join', 'global_chat');
+    newSocket.emit('event-join', { room: 'global_chat', user: currentUser?.username });
 
     return () => {
       newSocket.disconnect();
